@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HABIT MANAGER</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <h1>Habit Tracker</h1>
+  <button id="createHabitButton">create habit</button>
+<!-- 🚀 FORM SECTION -->
+<form id="habitForm" style="display: none;">
+  <label for="titleInput">Habit Title:</label>
+  <input type="text" id="titleInput" placeholder="e.g. Drink Water" required />
+
+  <br /><br />
+
+  <label for="freqInput">Frequency Type:</label>
+  <select id="freqInput" required>
+    <option value="">-- Select Frequency --</option>
+    <option value="daily">Daily</option>
+    <option value="interval">Interval</option>
+    <option value="weekly">Weekly</option>
+  </select>
+
+  <br /><br />
+
+  <button type="submit">Create</button>
+</form>
+
+<!-- Where created habits show up -->
+<div id="habitDisplayArea"></div>
+
+
+
+  <script src="renderer.js"></script>
+</body>
+</html>
