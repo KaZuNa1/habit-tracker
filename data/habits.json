@@ -1,1 +1,42 @@
-[]
+[
+  {
+    "id": 1751283139929,
+    "title": "wdad",
+    "frequencyType": "interval",
+    "intervalday": "5",
+    "customdays": "",
+    "counter": 0,
+    "incrementation": 0,
+    "projectId": "default",
+    "lastCompleted": null,
+    "nextDue": "2025-06-30",
+    "isActiveToday": true,
+    "currentStreak": 0,
+    "totalCompleted": 0,
+    "completionHistory": [],
+    "isActive": true,
+    "createdDate": "2025-06-30",
+    "notes": "",
+    "priority": "medium"
+  },
+  {
+    "id": 1751283185376,
+    "title": "sd",
+    "frequencyType": "daily",
+    "intervalday": null,
+    "customdays": "",
+    "counter": 0,
+    "incrementation": 0,
+    "projectId": "default",
+    "lastCompleted": null,
+    "nextDue": "2025-06-30",
+    "isActiveToday": true,
+    "currentStreak": 0,
+    "totalCompleted": 0,
+    "completionHistory": [],
+    "isActive": true,
+    "createdDate": "2025-06-30",
+    "notes": "",
+    "priority": "medium"
+  }
+]

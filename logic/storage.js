@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const Habit = require('./Habit'); // Add this line
+const Habit = require('./habit'); // Add this line
 
 const dataDir = path.join(__dirname, '..', 'data');
 const dataFilePath = path.join(dataDir, 'habits.json');
@@ -21,15 +21,26 @@ function readHabits() {
     const plainData = JSON.parse(rawData);
     
     // Convert plain objects back to Habit instances with ALL 7 parameters
-    return plainData.map(habitData => new Habit(
-      habitData.id,
-      habitData.title, 
-      habitData.frequencyType,
-      habitData.counter,
-      habitData.incrementation,
-      habitData.customdays,
-      habitData.intervalday
-    ));
+return plainData.map(habitData => new Habit(
+    habitData.id,
+    habitData.title, 
+    habitData.frequencyType,
+    habitData.intervalday,
+    habitData.customdays,
+    habitData.counter,
+    habitData.incrementation,
+    habitData.projectId || "default",
+    habitData.lastCompleted || null,
+    habitData.nextDue || null,
+    habitData.isActiveToday || false,
+    habitData.currentStreak || 0,
+    habitData.totalCompleted || 0,
+    habitData.completionHistory || [],
+    habitData.isActive !== undefined ? habitData.isActive : true,
+    habitData.createdDate || new Date().toISOString().split('T')[0],
+    habitData.notes || "",
+    habitData.priority || "medium"
+));
     
   } catch (error) {
     console.error('Error reading habits file:', error);
