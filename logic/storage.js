@@ -81,6 +81,7 @@ function removeHabit(habitToDelete){
 module.exports = {
   saveHabit,
   readHabits, // Export this in case you need it later
-  removeHabit
+  removeHabit,
+  writeHabits
 };
 
