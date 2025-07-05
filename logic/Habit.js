@@ -1,5 +1,5 @@
 class Habit{
-    constructor(id, title, frequencyType, intervalday, customdays, counter, incrementation, projectId, lastCompleted, nextDue, isActiveToday, currentStreak, totalCompleted, completionHistory, isActive, createdDate, notes, priority){
+    constructor(id, title, frequencyType, intervalday, customdays, counter, incrementation, projectId, lastCompleted, nextDue, isActiveToday, currentStreak, totalCompleted, completionHistory, isActive, createdDate, notes, priority, startDate){
         this.id = id;
         this.title = title;
         this.frequencyType = frequencyType;
@@ -16,11 +16,12 @@ class Habit{
         this.completionHistory = completionHistory;
         this.isActive = isActive;
         this.createdDate = createdDate;
-        this.notes = notes;         // ✅ Add this
-        this.priority = priority;   // ✅ Add this
+        this.notes = notes;
+        this.priority = priority;
+        this.startDate = startDate;  // ✅ NEW: When habit should start being active
     }
     info() {
-        return `ID: ${this.id}<br>Title: ${this.title}<br>Project: ${this.projectId}<br>Frequency: ${this.frequencyType}<br>Interval Day: ${this.intervalday}<br>Custom Days: ${this.customdays}<br>Counter: ${this.counter}<br>Incrementation: ${this.incrementation}<br>Last Completed: ${this.lastCompleted || 'Never'}<br>Next Due: ${this.nextDue}<br>Active Today: ${this.isActiveToday}<br>Current Streak: ${this.currentStreak}<br>Total Completed: ${this.totalCompleted}<br>Completion History: ${this.completionHistory.length} entries<br>Is Active: ${this.isActive}<br>Created: ${this.createdDate}<br>Notes: ${this.notes || ''}<br>Priority: ${this.priority}`;
+        return `ID: ${this.id}<br>Title: ${this.title}<br>Project: ${this.projectId}<br>Frequency: ${this.frequencyType}<br>Interval Day: ${this.intervalday}<br>Custom Days: ${this.customdays}<br>Counter: ${this.counter}<br>Incrementation: ${this.incrementation}<br>Start Date: ${this.startDate}<br>Last Completed: ${this.lastCompleted || 'Never'}<br>Next Due: ${this.nextDue}<br>Active Today: ${this.isActiveToday}<br>Current Streak: ${this.currentStreak}<br>Total Completed: ${this.totalCompleted}<br>Completion History: ${this.completionHistory.length} entries<br>Is Active: ${this.isActive}<br>Created: ${this.createdDate}<br>Notes: ${this.notes || ''}<br>Priority: ${this.priority}`;
     }
 }
 

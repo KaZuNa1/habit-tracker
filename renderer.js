@@ -9,6 +9,7 @@ const form = document.getElementById('habitForm');
 const freqInput = document.getElementById('freqInput');
 const displayArea = document.getElementById('habitDisplayArea');
 const counter_checkbox = document.getElementById('counter_checkbox');
+const startDateInput = document.getElementById('startDate');  // ✅ NEW: Start date input
 
 // Form sections
 const dailySection = document.getElementById('daily_sec');
@@ -212,9 +213,16 @@ function isHabitDueToday(habit) {
     
     console.log('Checking if habit is due:');
     console.log('Today:', today);
+    console.log('Habit startDate:', habit.startDate);
     console.log('Habit nextDue:', habit.nextDue);
     console.log('Habit frequency:', habit.frequencyType);
     console.log('Custom days:', habit.customdays);
+    
+    // ✅ NEW: Check if habit has started yet
+    if (today < habit.startDate) {
+        console.log('Habit has not started yet');
+        return false;
+    }
     
     if (!habit.nextDue) {
         console.log('No nextDue set, returning true');
@@ -294,6 +302,12 @@ function markHabitComplete(habit) {
 
 function autoUpdateStreakIfBroken(habit) {
     const today = new Date().toISOString().split('T')[0];
+    
+    // ✅ NEW: Don't check streak if habit hasn't started yet
+    if (today < habit.startDate) {
+        console.log(`Habit ${habit.title} hasn't started yet (${habit.startDate}), skipping streak check`);
+        return habit;
+    }
     
     if (!habit.completionHistory || habit.completionHistory.length === 0) {
         return habit;
@@ -401,6 +415,11 @@ function showEditForm(habit) {
             <input type="checkbox" id="editSunday" value="sunday"> Sunday<br>
             <br>
         </div>
+
+        <!-- ✅ NEW: Start Date Section -->
+        <label for="editStartDate">Start Date:</label>
+        <input type="date" id="editStartDate" value="${habit.startDate}" required />
+        <br><br>
 
         <label for="editCounterCheckbox">Need Counter?</label>
         <input type="checkbox" id="editCounterCheckbox" ${habit.counter !== 0 || habit.incrementation !== 0 ? 'checked' : ''}>
@@ -513,6 +532,7 @@ function closeEditModal() {
 function saveEditedHabit(originalHabit) {
     const newTitle = document.getElementById('editTitle').value;
     const newFreq = document.getElementById('editFreq').value;
+    const newStartDate = document.getElementById('editStartDate').value;  // ✅ NEW: Get start date
     
     let newIntervalday = null;
     let newCustomdays = '';
@@ -534,7 +554,7 @@ function saveEditedHabit(originalHabit) {
         newIncrementation = parseInt(document.getElementById('editIncrementation').value) || 1;
     }
     
-    console.log('Saving edited habit:', {newTitle, newFreq, newIntervalday, newCustomdays, newCounter, newIncrementation});
+    console.log('Saving edited habit:', {newTitle, newFreq, newIntervalday, newCustomdays, newCounter, newIncrementation, newStartDate});  // ✅ NEW: Added to log
     
     const updatedHabit = {
         ...originalHabit,
@@ -543,7 +563,8 @@ function saveEditedHabit(originalHabit) {
         intervalday: newIntervalday,
         customdays: newCustomdays,
         counter: newCounter,
-        incrementation: newIncrementation
+        incrementation: newIncrementation,
+        startDate: newStartDate  // ✅ NEW: Update start date
     };
     
     updateHabitInStorage(updatedHabit);
@@ -557,6 +578,10 @@ function saveEditedHabit(originalHabit) {
 showFormButton.addEventListener('click', function () {
     form.style.display = 'block';
     hideAllConditionalSections();
+    
+    // ✅ NEW: Set default start date to today when form opens
+    const today = new Date().toISOString().split('T')[0];
+    startDateInput.value = today;
 });
 
 freqInput.addEventListener('change', function () {
@@ -585,6 +610,7 @@ form.addEventListener('submit', function (e) {
 
     const title = document.getElementById('titleInput').value;
     const freq = document.getElementById('freqInput').value;
+    const startDate = startDateInput.value;  // ✅ NEW: Get start date value
     
     let intervalday = null;
     let customdays = '';
@@ -608,7 +634,7 @@ form.addEventListener('submit', function (e) {
         incrementation = parseInt(document.getElementById('incrementation_value').value) || 1;
     }
 
-    console.log('Creating habit:', {title, freq, intervalday, customdays, counter, incrementation});
+    console.log('Creating habit:', {title, freq, intervalday, customdays, counter, incrementation, startDate});  // ✅ NEW: Added startDate to log
 
     try {
         const habit = createHabit(
@@ -619,7 +645,8 @@ form.addEventListener('submit', function (e) {
             customdays,
             counter,
             incrementation,
-            "default"
+            "default",
+            startDate  // ✅ NEW: Pass start date to createHabit
         );
         
         loadHabits();
@@ -688,7 +715,7 @@ function displayHabit(habit) {
         checkboxLabel.textContent = ` 📅 Due: ${habit.nextDue}`;
         checkboxLabel.style.color = '#666';
     } else if (isCompletedToday) {  // Fixed variable name
-        checkboxLabel.textContent = ' Completed Today';
+        checkboxLabel.textContent = ' ✅ Completed Today';
         checkboxLabel.style.color = '#28a745';
     } else {
         checkboxLabel.textContent = ' Mark as Complete';
