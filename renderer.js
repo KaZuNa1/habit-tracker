@@ -10,6 +10,7 @@ const form = document.getElementById('habitForm');
 const freqInput = document.getElementById('freqInput');
 const displayArea = document.getElementById('habitDisplayArea');
 const counterCheckbox = document.getElementById('counter_checkbox');
+const noteCheckbox = document.getElementById('note_checkbox'); 
 const startDateInput = document.getElementById('startDate');
 
 // ===== TOGGLE STATE =====
@@ -20,6 +21,7 @@ const dailySection = document.getElementById('daily_sec');
 const intervalSection = document.getElementById('intervalday_section');
 const customSection = document.getElementById('custom_weekdays_section');
 const counterSection = document.getElementById('counter_section');
+const noteSection = document.getElementById('note_section');
 
 // ===== CONSTANTS =====
 const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -43,6 +45,7 @@ function hideAllFrequencySections() {
 function hideAllConditionalSections() {
     hideAllFrequencySections();
     counterSection.style.display = 'none';
+    noteSection.style.display = 'none'; 
 }
 
 function showSection(section) {
@@ -518,6 +521,11 @@ function setupEditFormEventListeners() {
         const counterSection = document.getElementById('editCounterInputSection');
         counterSection.style.display = this.checked ? 'block' : 'none';
     });
+
+    document.getElementById('editNoteCheckbox').addEventListener('change', function() {
+        const noteSection = document.getElementById('editNoteInputSection');
+        noteSection.style.display = this.checked ? 'block' : 'none';
+    });
 }
 
 function closeEditModal() {
@@ -551,6 +559,11 @@ function saveEditedHabit(originalHabit) {
         newIncrementation = parseInt(document.getElementById('editIncrementation').value) || 1;
     }
     
+    let newNotes = '';
+    if (document.getElementById('editNoteCheckbox').checked) {
+        newNotes = document.getElementById('editNote').value || '';
+    }
+
     const updatedHabit = {
         ...originalHabit,
         title: newTitle,
@@ -559,7 +572,8 @@ function saveEditedHabit(originalHabit) {
         customdays: newCustomdays,
         counter: newCounter,
         incrementation: newIncrementation,
-        startDate: newStartDate
+        startDate: newStartDate,
+        notes: newNotes
     };
     
     // Recalculate nextDue when editing
@@ -653,6 +667,16 @@ function openEditModal(habit) {
             <br><br>
         </div>
 
+        <label for="editNoteCheckbox">Want to edit note?</label>
+<input type="checkbox" id="editNoteCheckbox" ${habit.notes && habit.notes.trim() !== '' ? 'checked' : ''}>
+<br><br>
+
+<div id="editNoteInputSection" style="display: ${habit.notes && habit.notes.trim() !== '' ? 'block' : 'none'};">
+    <label for="editNote">Note:</label>
+    <textarea id="editNote" placeholder="Write your note here..." rows="3" cols="40">${habit.notes || ''}</textarea>
+    <br><br>
+</div>
+
         <button type="button" id="saveEditBtn">Save Changes</button>
         <button type="button" id="cancelEditBtn">Cancel</button>
     `;
@@ -717,6 +741,10 @@ counterCheckbox.addEventListener('change', function() {
     counterSection.style.display = this.checked ? 'block' : 'none';
 });
 
+noteCheckbox.addEventListener('change', function() {
+    noteSection.style.display = this.checked ? 'block' : 'none';
+});
+
 form.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -743,6 +771,11 @@ form.addEventListener('submit', function (e) {
         incrementation = parseInt(document.getElementById('incrementation_value').value) || 1;
     }
 
+    let note = '';
+if (noteCheckbox.checked) {
+    note = document.getElementById('note_value').value || '';
+}
+console.log('Note value from form:', note); // ✅ ADD THIS DEBUG LINE
     try {
         createHabit(
             Date.now(),
@@ -753,7 +786,8 @@ form.addEventListener('submit', function (e) {
             counter,
             incrementation,
             "default",
-            startDate
+            startDate,
+            note
         );
         
         loadHabits();
