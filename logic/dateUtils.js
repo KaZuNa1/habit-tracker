@@ -127,10 +127,61 @@ function checkIfCustomWeekdaysStreakBroken(lastCompletionDate, todayDate, custom
     return false; // No valid days were missed
 }
 
+function recalculateNextDueFromStart(habit, currentDate) {
+    // ✅ NEW FUNCTION: Calculate next due from start date, find first valid date >= currentDate
+    
+    if (currentDate < habit.startDate) {
+        // Haven't started yet - next due is start date
+        return habit.startDate;
+    }
+    
+    if (habit.frequencyType === 'daily') {
+        // Daily: next due is today (if not completed) or tomorrow (if completed today)
+        const isCompletedToday = habit.completionHistory && 
+            habit.completionHistory[habit.completionHistory.length - 1] === currentDate;
+        
+        if (isCompletedToday) {
+            const tomorrow = new Date(currentDate);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            return tomorrow.toISOString().split('T')[0];
+        } else {
+            return currentDate; // Due today
+        }
+        
+    } else if (habit.frequencyType === 'interval') {
+    // Interval: find next valid date from start date
+    const startDate = new Date(habit.startDate);
+    const current = new Date(currentDate);
+    const intervalDays = parseInt(habit.intervalday);
+    
+    // If never completed, first due date is start date
+    if (!habit.completionHistory || habit.completionHistory.length === 0) {
+        if (currentDate >= habit.startDate) {
+            return habit.startDate; // Due on start date
+        } else {
+            return habit.startDate; // Not started yet
+        }
+    }
+    
+    // If completed before, calculate next interval from last completion
+    const lastCompletion = habit.completionHistory[habit.completionHistory.length - 1];
+    const nextDue = new Date(lastCompletion);
+    nextDue.setDate(nextDue.getDate() + intervalDays);
+    
+    return nextDue.toISOString().split('T')[0];
+} else if (habit.frequencyType === 'custom_weekdays') {
+        // Custom weekdays: find next valid weekday >= currentDate
+        return getNextValidWeekday(new Date(currentDate), habit.customdays).toISOString().split('T')[0];
+    }
+    
+    return currentDate; // Fallback
+}
+
 module.exports = {
     calculateNextDue,
     calculateNextDueAfterCompletion,
     getNextValidWeekday,
     getNextValidWeekdayAfterCompletion,
-    checkIfCustomWeekdaysStreakBroken  // ✅ Export the new function
+    checkIfCustomWeekdaysStreakBroken,
+    recalculateNextDueFromStart  // ✅ Export the new function
 };

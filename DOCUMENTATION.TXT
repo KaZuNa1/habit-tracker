@@ -1,0 +1,162 @@
+Habit Tracker App - Complete Technical Documentation
+Project Overview
+You're building a sophisticated desktop habit tracker application using Electron that helps users create, manage, and track habits with flexible scheduling and smart organization features. The app combines the power of Node.js backend logic with a web-based frontend interface.
+Core Architecture
+Technology Stack
+
+Frontend: HTML, CSS, JavaScript (DOM manipulation)
+Backend Logic: Node.js modules with require/export system
+Desktop Framework: Electron (evidenced by Node.js requires in browser context)
+Data Storage: Local JSON file persistence
+File Structure: Modular architecture with separate concerns
+
+Key Components
+1. Habit Class (Habit.js)
+The core data model containing 19 properties:
+
+Identity: id, title, projectId, createdDate
+Scheduling: frequencyType, intervalday, customdays, startDate, nextDue
+Progress Tracking: currentStreak, totalCompleted, completionHistory, lastCompleted
+State Management: isActiveToday, isActive
+Enhancement Features: counter, incrementation, notes, priority
+
+2. Storage System (storage.js)
+
+File-based persistence using habits.json
+CRUD operations: saveHabit(), readHabits(), removeHabit(), writeHabits()
+Data integrity: Converts plain JSON back to Habit class instances
+Backward compatibility: Handles missing properties in existing data
+
+3. Date Calculation Engine (dateUtils.js)
+Sophisticated scheduling logic with multiple functions:
+
+calculateNextDue(): Initial due date calculation (starts today)
+calculateNextDueAfterCompletion(): Post-completion scheduling
+recalculateNextDueFromStart(): Recalculates from habit start date
+Custom weekday handling: getNextValidWeekday(), getNextValidWeekdayAfterCompletion()
+Streak management: checkIfCustomWeekdaysStreakBroken()
+
+4. Frontend Interface (renderer.js)
+
+Dynamic form management: Shows/hides sections based on frequency type
+Real-time habit display: Updates UI when habits change
+Edit modal system: In-place editing with validation
+Smart checkbox logic: Handles completion/undo based on due status
+
+Frequency Types & Scheduling Logic
+1. Daily Habits
+
+Due every single day
+Simple streak calculation (missed day = broken streak)
+Next due: tomorrow after completion
+
+2. Interval Habits
+
+Due every X days (user-defined interval)
+More forgiving streak logic (grace period)
+Next due: current date + interval days
+
+3. Custom Weekdays
+
+Due only on specified days of the week
+Complex streak logic (checks for missed valid days)
+Most sophisticated scheduling algorithm
+
+Current Features (Phases 1-4)
+✅ Completed Core Features
+
+Habit Creation: Full form with all frequency types
+Start Date Support: Habits can begin on future dates
+Progress Tracking: Streaks, counters, completion history
+Edit Functionality: Complete modal-based editing
+Delete Operations: Safe habit removal
+Smart Validation: Prevents interaction with non-due habits
+Undo System: Reverse completions if needed
+Auto-streak Management: Automatically breaks streaks when missed
+
+✅ Data Persistence
+
+JSON file storage with full state preservation
+Backward compatibility for existing data
+Proper class instantiation from stored data
+
+✅ Advanced Scheduling
+
+Multiple frequency types working correctly
+Proper next-due calculations
+Start date respect (habits don't appear before start date)
+Post-completion scheduling logic
+
+Current Phase: Phase 4 - Bug Fixes & Requirements Validation
+What You're Currently Working On:
+
+Fixing edge cases in date calculations
+Ensuring streak logic works correctly for all frequency types
+Validating completion/undo functionality
+Testing start date behavior thoroughly
+Resolving any UI/UX inconsistencies
+
+Known Areas of Focus:
+
+Custom weekday streak calculations
+Start date validation and enforcement
+Completion checkbox state management
+Next due date accuracy after edits
+
+Upcoming Development Phases
+Phase 5: Smart Scheduling 🎯
+Goal: Habits only appear when they're actually due
+
+Hide non-due habits from main view
+Today's Due Habits section
+Upcoming Habits preview
+Overdue Habits warning system
+Filter/view options (all habits vs due today)
+
+Phase 6: Project Organization 📁
+Goal: Group habits by projects/topics
+
+Project creation system
+Project assignment for habits
+Project-based views and filtering
+Project progress summaries
+Multi-project management
+
+Phase 7: UI/UX Enhancement 🎨
+Goal: Professional, intuitive interface
+
+Modern CSS framework integration
+Responsive design principles
+Visual progress indicators (charts, graphs)
+Dark/light mode toggle
+Improved animations and transitions
+Better mobile experience (if applicable)
+
+Technical Strengths of Current Implementation
+Excellent Architecture Decisions:
+
+Modular design with clear separation of concerns
+Class-based data modeling with comprehensive properties
+Sophisticated date logic handling edge cases
+Flexible frequency system supporting various patterns
+Robust storage system with data integrity
+Smart UI state management based on habit status
+
+Advanced Features Already Working:
+
+Start date enforcement (habits respect future start dates)
+Automatic streak breaking when habits are missed
+Undo functionality for accidental completions
+Dynamic form sections based on frequency selection
+Real-time UI updates after any data change
+Counter system with custom incrementation
+
+Data Flow Summary
+
+Creation: User fills form → createHabit() → Calculate initial nextDue → Save to JSON
+Display: Load habits → Check due status → Update streaks → Render with appropriate controls
+Completion: User clicks checkbox → Validate due status → Update progress → Recalculate nextDue → Save
+Editing: User opens modal → Pre-populate form → Save changes → Recalculate schedules → Refresh display
+
+Current State Assessment
+Your app is remarkably sophisticated for a personal habit tracker. The scheduling logic rivals commercial apps, and the modular architecture sets you up perfectly for the remaining phases. The foundation is solid, and you're at the right point to polish Phase 4 before moving to smart scheduling.
