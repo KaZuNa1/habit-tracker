@@ -22,7 +22,53 @@ class Habit{
         this.startDate = startDate;  // ✅ NEW: When habit should start being active
     }
     info() {
-    return `ID: ${this.id}<br>Title: ${this.title}<br>Project: ${this.projectId}<br>Frequency: ${this.frequencyType}<br>Interval Day: ${this.intervalday}<br>Custom Days: ${this.customdays}<br>Counter: ${this.counter}<br>Incrementation: ${this.incrementation}<br>Start Date: ${this.startDate}<br>Last Completed: ${this.lastCompleted || 'Never'}<br>Next Due: ${this.nextDue}<br>Active Today: ${this.isActiveToday}<br>Current Streak: ${this.currentStreak}<br>Total Completed: ${this.totalCompleted}<br>Completion History: ${this.completionHistory.length} entries<br>Is Active: ${this.isActive}<br>Created: ${this.createdDate}<br>Notes: ${this.notes || 'No notes'}<br>Priority: ${this.priority}`;
+    let displayInfo = `
+        <strong>${this.title}</strong><br>
+        Project: ${this.projectId}<br>
+        Frequency: ${this.getFrequencyDisplay()}<br>
+    `;
+    
+    // Conditionally add counter info
+    if (this.counter !== 0 || this.incrementation !== 0) {
+        displayInfo += `Counter: ${this.counter} (+${this.incrementation})<br>`;
+    }
+    
+    displayInfo += `
+        Start Date: ${this.startDate}<br>
+        Last Completed: ${this.lastCompleted || 'Never'}<br>
+        Next Due: ${this.nextDue}<br>
+        Current Streak: ${this.currentStreak}<br>
+        Total Completed: ${this.totalCompleted}<br>
+        Created: ${this.createdDate}<br>
+    `;
+    
+    // Conditionally add notes
+    if (this.notes && this.notes.trim() !== '') {
+        displayInfo += `Notes: ${this.notes}<br>`;
+    }
+    
+    displayInfo += `Priority: ${this.priority}<br>`;
+    
+    return displayInfo;
+}
+
+// Add this new helper method for frequency display
+getFrequencyDisplay() {
+    if (this.frequencyType === 'daily') {
+        return 'Daily';
+    } else if (this.frequencyType === 'interval') {
+        return `Every ${this.intervalday} days`;
+    } else if (this.frequencyType === 'custom_weekdays') {
+        if (this.customdays) {
+            // Convert comma-separated days to readable format
+            const days = this.customdays.split(',')
+                .map(day => day.charAt(0).toUpperCase() + day.slice(1))
+                .join(', ');
+            return `Custom: ${days}`;
+        }
+        return 'Custom weekdays';
+    }
+    return this.frequencyType;
 }
 }
 
