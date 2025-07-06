@@ -5,11 +5,15 @@ const { calculateNextDue, calculateNextDueAfterCompletion, checkIfCustomWeekdays
 
 // ===== DOM ELEMENTS =====
 const showFormButton = document.getElementById('createHabitButton');
+const toggleViewButton = document.getElementById('toggleViewButton');
 const form = document.getElementById('habitForm');
 const freqInput = document.getElementById('freqInput');
 const displayArea = document.getElementById('habitDisplayArea');
 const counterCheckbox = document.getElementById('counter_checkbox');
 const startDateInput = document.getElementById('startDate');
+
+// ===== TOGGLE STATE =====
+let showAllHabits = false; // ✅ ADD THIS VARIABLE
 
 // Form sections
 const dailySection = document.getElementById('daily_sec');
@@ -469,9 +473,10 @@ function loadHabits() {
     const isDue = isHabitDueToday(updatedHabit);
     const isCompletedToday = isHabitCompletedToday(updatedHabit);
     
-    if (isDue || isCompletedToday) {
-        displayHabit(updatedHabit);
-    }
+    // ✅ NEW: Check toggle state
+if (showAllHabits || isDue || isCompletedToday) {
+    displayHabit(updatedHabit);
+}
     // If neither due nor completed today, habit is hidden
 });
 }
@@ -676,6 +681,23 @@ showFormButton.addEventListener('click', function () {
     
     // Set default start date to today when form opens
     startDateInput.value = getTodayDate();
+});
+
+// ===== TOGGLE VIEW EVENT LISTENER =====
+toggleViewButton.addEventListener('click', function() {
+    showAllHabits = !showAllHabits; // Flip the state
+    
+    // Update button text
+    toggleViewButton.textContent = showAllHabits ? 'Show Today Only' : 'Show All Habits';
+    
+    // Reload habits with new filter
+    loadHabits();
+});
+
+document.getElementById('cancelFormButton').addEventListener('click', function() {
+    form.reset(); // Clear the form
+    hideAllConditionalSections(); // Hide frequency sections
+    form.style.display = 'none'; // Hide the form
 });
 
 freqInput.addEventListener('change', function () {
