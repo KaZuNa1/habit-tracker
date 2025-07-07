@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const Habit = require('./habit');
+const Habit = require('./Habit');
 
 const dataDir = path.join(__dirname, '..', 'data');
 const dataFilePath = path.join(dataDir, 'habits.json');
@@ -39,8 +39,10 @@ function readHabits() {
         habitData.isActive !== undefined ? habitData.isActive : true,
         habitData.createdDate || new Date().toISOString().split('T')[0],
         habitData.notes || "",
-        habitData.priority || "medium",
-        habitData.startDate || habitData.createdDate || new Date().toISOString().split('T')[0]  // ✅ NEW: Default to createdDate for backward compatibility
+        habitData.belongs || habitData.priority || "whole day",
+        habitData.startDate || habitData.createdDate || new Date().toISOString().split('T')[0] , // ✅ NEW: Default to createdDate for backward compatibility
+        habitData.color || "default"
+        
     ));
     
   } catch (error) {

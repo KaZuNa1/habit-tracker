@@ -1,0 +1,9 @@
+okay lets start from this:
+
+my current habit block is working based on "p" element you know 
+
+lets change that and make it block element not inline because habit has to be displayed blocks for layouts 
+
+my goals for now:
+
+change habits from inline to block

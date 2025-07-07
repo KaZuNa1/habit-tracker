@@ -7,7 +7,7 @@
     "customdays": "",
     "counter": 0,
     "incrementation": 0,
-    "projectId": "default",
+    "projectId": "Housework",
     "lastCompleted": null,
     "nextDue": "2025-07-07",
     "isActiveToday": true,
@@ -17,8 +17,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "whole day",
+    "startDate": "2025-07-07",
+    "color": "blue"
   },
   {
     "id": 1751723128170,
@@ -38,8 +39,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-08"
+    "belongs": "medium",
+    "startDate": "2025-07-08",
+    "color": "default"
   },
   {
     "id": 1751723145937,
@@ -49,7 +51,7 @@
     "customdays": "",
     "counter": 0,
     "incrementation": 0,
-    "projectId": "default",
+    "projectId": "Housework",
     "lastCompleted": null,
     "nextDue": "2025-07-07",
     "isActiveToday": true,
@@ -59,8 +61,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723160741,
@@ -80,8 +83,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-08"
+    "belongs": "medium",
+    "startDate": "2025-07-08",
+    "color": "default"
   },
   {
     "id": 1751723177204,
@@ -93,7 +97,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-12",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -101,8 +105,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723193900,
@@ -114,7 +119,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-12",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -122,8 +127,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723209203,
@@ -135,7 +141,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-12",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -143,8 +149,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723226588,
@@ -164,8 +171,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-25"
+    "belongs": "medium",
+    "startDate": "2025-07-25",
+    "color": "default"
   },
   {
     "id": 1751723250401,
@@ -185,8 +193,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-15"
+    "belongs": "medium",
+    "startDate": "2025-07-15",
+    "color": "default"
   },
   {
     "id": 1751723266097,
@@ -206,8 +215,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-15"
+    "belongs": "medium",
+    "startDate": "2025-07-15",
+    "color": "default"
   },
   {
     "id": 1751723289042,
@@ -217,7 +227,7 @@
     "customdays": "monday",
     "counter": 0,
     "incrementation": 0,
-    "projectId": "default",
+    "projectId": "Skincare",
     "lastCompleted": null,
     "nextDue": "2025-07-07",
     "isActiveToday": true,
@@ -227,8 +237,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723301248,
@@ -240,7 +251,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-09",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -248,8 +259,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723314117,
@@ -261,7 +273,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-11",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -269,8 +281,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723328643,
@@ -282,7 +295,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-08",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -290,8 +303,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723341362,
@@ -301,7 +315,7 @@
     "customdays": "monday",
     "counter": 0,
     "incrementation": 0,
-    "projectId": "default",
+    "projectId": "IELTS",
     "lastCompleted": null,
     "nextDue": "2025-07-07",
     "isActiveToday": true,
@@ -311,8 +325,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723352652,
@@ -322,7 +337,7 @@
     "customdays": "monday",
     "counter": 0,
     "incrementation": 0,
-    "projectId": "default",
+    "projectId": "IELTS",
     "lastCompleted": null,
     "nextDue": "2025-07-07",
     "isActiveToday": true,
@@ -332,8 +347,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723366675,
@@ -345,7 +361,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-08",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -353,8 +369,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723374091,
@@ -366,7 +383,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-08",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -374,8 +391,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723385078,
@@ -387,7 +405,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-09",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -395,8 +413,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723394306,
@@ -408,7 +427,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-09",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -416,8 +435,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723403485,
@@ -429,7 +449,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-10",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -437,8 +457,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723424821,
@@ -450,7 +471,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-10",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -458,8 +479,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723434145,
@@ -471,7 +493,7 @@
     "incrementation": 0,
     "projectId": "default",
     "lastCompleted": null,
-    "nextDue": "2025-07-07",
+    "nextDue": "2025-07-11",
     "isActiveToday": true,
     "currentStreak": 0,
     "totalCompleted": 0,
@@ -479,8 +501,9 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
   },
   {
     "id": 1751723444112,
@@ -490,7 +513,7 @@
     "customdays": "",
     "counter": 0,
     "incrementation": 0,
-    "projectId": "default",
+    "projectId": "IELTS",
     "lastCompleted": null,
     "nextDue": "2025-07-07",
     "isActiveToday": true,
@@ -500,7 +523,162 @@
     "isActive": true,
     "createdDate": "2025-07-05",
     "notes": "",
-    "priority": "medium",
-    "startDate": "2025-07-07"
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
+  },
+  {
+    "id": 1751838297053,
+    "title": "Forex 90 min",
+    "frequencyType": "daily",
+    "intervalday": null,
+    "customdays": "",
+    "counter": 0,
+    "incrementation": 0,
+    "projectId": "GET RICH",
+    "lastCompleted": null,
+    "nextDue": "2025-07-07",
+    "isActiveToday": true,
+    "currentStreak": 0,
+    "totalCompleted": 0,
+    "completionHistory": [],
+    "isActive": true,
+    "createdDate": "2025-07-06",
+    "notes": "",
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
+  },
+  {
+    "id": 1751838312302,
+    "title": "looksmaxxing 30 min",
+    "frequencyType": "daily",
+    "intervalday": null,
+    "customdays": "",
+    "counter": 0,
+    "incrementation": 0,
+    "projectId": "GLOW UP",
+    "lastCompleted": null,
+    "nextDue": "2025-07-07",
+    "isActiveToday": true,
+    "currentStreak": 0,
+    "totalCompleted": 0,
+    "completionHistory": [],
+    "isActive": true,
+    "createdDate": "2025-07-06",
+    "notes": "",
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
+  },
+  {
+    "id": 1751838332888,
+    "title": "data org 60 min",
+    "frequencyType": "daily",
+    "intervalday": null,
+    "customdays": "",
+    "counter": 0,
+    "incrementation": 0,
+    "projectId": "WORKSHOP",
+    "lastCompleted": null,
+    "nextDue": "2025-07-07",
+    "isActiveToday": true,
+    "currentStreak": 0,
+    "totalCompleted": 0,
+    "completionHistory": [],
+    "isActive": true,
+    "createdDate": "2025-07-06",
+    "notes": "",
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
+  },
+  {
+    "id": 1751838345594,
+    "title": "Diet researching 30 min",
+    "frequencyType": "daily",
+    "intervalday": null,
+    "customdays": "",
+    "counter": 0,
+    "incrementation": 0,
+    "projectId": "WORKSHOP",
+    "lastCompleted": null,
+    "nextDue": "2025-07-07",
+    "isActiveToday": true,
+    "currentStreak": 0,
+    "totalCompleted": 0,
+    "completionHistory": [],
+    "isActive": true,
+    "createdDate": "2025-07-06",
+    "notes": "",
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
+  },
+  {
+    "id": 1751838361315,
+    "title": "coding 90 min",
+    "frequencyType": "daily",
+    "intervalday": null,
+    "customdays": "",
+    "counter": 0,
+    "incrementation": 0,
+    "projectId": "GET RICH",
+    "lastCompleted": null,
+    "nextDue": "2025-07-07",
+    "isActiveToday": true,
+    "currentStreak": 0,
+    "totalCompleted": 0,
+    "completionHistory": [],
+    "isActive": true,
+    "createdDate": "2025-07-06",
+    "notes": "",
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "default"
+  },
+  {
+    "id": 1751859838337,
+    "title": "EVENING ROUTINE",
+    "frequencyType": "daily",
+    "intervalday": null,
+    "customdays": "",
+    "counter": 0,
+    "incrementation": 0,
+    "projectId": "Wellness",
+    "lastCompleted": null,
+    "nextDue": "2025-07-07",
+    "isActiveToday": true,
+    "currentStreak": 0,
+    "totalCompleted": 0,
+    "completionHistory": [],
+    "isActive": true,
+    "createdDate": "2025-07-07",
+    "notes": "1. Чилээ гаргах хальт биеэ хөдөлгөх\n2. Гэр цэвэрлэх жоохон\n3. Гутал арчих\n4. Лемонтой ус бэлдэх\n5. Нурууны дасгалаа хийх\n6. Маргааш чухал төлөвлөх ёстой ажил байвал зохицуулах\n7. Шүршүүрт орох\n8. Skincare байвал хийгээд унтана",
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "cyan"
+  },
+  {
+    "id": 1751860005910,
+    "title": "MORNING ROUTINE",
+    "frequencyType": "daily",
+    "intervalday": null,
+    "customdays": "",
+    "counter": 0,
+    "incrementation": 0,
+    "projectId": "WELLNESS",
+    "lastCompleted": null,
+    "nextDue": "2025-07-07",
+    "isActiveToday": true,
+    "currentStreak": 0,
+    "totalCompleted": 0,
+    "completionHistory": [],
+    "isActive": true,
+    "createdDate": "2025-07-07",
+    "notes": "1. Pooping\n2. Contrast shower\n3. Нурууны дасгал\n4. Posture дасгал\n5. Clarify current situation and take motivation\n6. Skincare\n7. Breakfast\n8. Light reading",
+    "belongs": "medium",
+    "startDate": "2025-07-07",
+    "color": "green"
   }
 ]

@@ -12,6 +12,9 @@ const displayArea = document.getElementById('habitDisplayArea');
 const counterCheckbox = document.getElementById('counter_checkbox');
 const noteCheckbox = document.getElementById('note_checkbox'); 
 const startDateInput = document.getElementById('startDate');
+const projectInput = document.getElementById('projectInput');
+const colorInput = document.getElementById('colorInput'); 
+const belongsInput = document.getElementById('belongsInput'); 
 
 // ===== TOGGLE STATE =====
 let showAllHabits = false; // ✅ ADD THIS VARIABLE
@@ -29,6 +32,19 @@ const COLORS = {
     SUCCESS: '#28a745',
     INFO: '#666',
     DEFAULT: '#000'
+};
+
+const HABIT_COLORS = {
+    default: '#6c757d',  // Gray
+    violet: '#8e44ad',   // Violet
+    red: '#e74c3c',      // Red
+    green: '#27ae60',    // Green
+    blue: '#3498db',     // Blue
+    orange: '#f39c12',   // Orange
+    pink: '#e91e63',     // Pink
+    cyan: '#17a2b8',     // Cyan
+    yellow: '#f1c40f',   // Yellow
+    purple: '#9b59b6'    // Purple
 };
 
 // ===== UTILITY FUNCTIONS =====
@@ -537,6 +553,9 @@ function closeEditModal() {
 
 function saveEditedHabit(originalHabit) {
     const newTitle = document.getElementById('editTitle').value;
+    const newProject = document.getElementById('editProject').value.trim() || 'default';
+    const newColor = document.getElementById('editColor').value || 'default';
+    const newBelongs = document.getElementById('editBelongs').value || 'whole day';
     const newFreq = document.getElementById('editFreq').value;
     const newStartDate = document.getElementById('editStartDate').value;
     
@@ -567,6 +586,9 @@ function saveEditedHabit(originalHabit) {
     const updatedHabit = {
         ...originalHabit,
         title: newTitle,
+        projectId: newProject,
+        color: newColor, // ✅ ADD THIS LINE
+        belongs: newBelongs, 
         frequencyType: newFreq,
         intervalday: newIntervalday,
         customdays: newCustomdays,
@@ -617,7 +639,37 @@ function openEditModal(habit) {
         
         <label for="editTitle">Habit Title:</label>
         <input type="text" id="editTitle" value="${habit.title}" required />
+
         <br><br>
+
+        <label for="editProject">Project Name:</label>
+        <input type="text" id="editProject" value="${habit.projectId}" placeholder="e.g. Health, Fitness, Work" />
+        <br><br>
+
+        <label for="editColor">Color:</label>
+        <select id="editColor">
+        <option value="default" ${habit.color === 'default' ? 'selected' : ''}>Default (Gray)</option>
+        <option value="violet" ${habit.color === 'violet' ? 'selected' : ''}>Violet</option>
+        <option value="red" ${habit.color === 'red' ? 'selected' : ''}>Red</option>
+        <option value="green" ${habit.color === 'green' ? 'selected' : ''}>Green</option>
+        <option value="blue" ${habit.color === 'blue' ? 'selected' : ''}>Blue</option>
+        <option value="orange" ${habit.color === 'orange' ? 'selected' : ''}>Orange</option>
+        <option value="pink" ${habit.color === 'pink' ? 'selected' : ''}>Pink</option>
+        <option value="cyan" ${habit.color === 'cyan' ? 'selected' : ''}>Cyan</option>
+        <option value="yellow" ${habit.color === 'yellow' ? 'selected' : ''}>Yellow</option>
+        <option value="purple" ${habit.color === 'purple' ? 'selected' : ''}>Purple</option>
+        </select>
+        <br><br>
+
+        <!-- ✅ ADD THIS BELONGS SECTION -->
+    <label for="editBelongs">Belongs to:</label>
+    <select id="editBelongs">
+        <option value="whole day" ${habit.belongs === 'whole day' ? 'selected' : ''}>Whole Day</option>
+        <option value="morning" ${habit.belongs === 'morning' ? 'selected' : ''}>Morning</option>
+        <option value="main" ${habit.belongs === 'main' ? 'selected' : ''}>Main</option>
+        <option value="evening" ${habit.belongs === 'evening' ? 'selected' : ''}>Evening</option>
+    </select>
+    <br><br>
 
         <label for="editFreq">Frequency Type:</label>
         <select id="editFreq" required>
@@ -751,6 +803,9 @@ form.addEventListener('submit', function (e) {
     const title = document.getElementById('titleInput').value;
     const freq = document.getElementById('freqInput').value;
     const startDate = startDateInput.value;
+    const projectName = projectInput.value.trim() || 'default'; 
+    const selectedColor = colorInput.value || 'default'; 
+    const selectedBelongs = belongsInput.value || 'whole day'; 
     
     let intervalday = null;
     let customdays = '';
@@ -785,9 +840,11 @@ console.log('Note value from form:', note); // ✅ ADD THIS DEBUG LINE
             customdays,
             counter,
             incrementation,
-            "default",
+            projectName,
             startDate,
-            note
+            note,
+            selectedColor,
+            selectedBelongs 
         );
         
         loadHabits();

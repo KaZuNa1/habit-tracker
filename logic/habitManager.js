@@ -1,19 +1,16 @@
-const Habit = require('./habit');
+const Habit = require('./Habit');
 const { saveHabit } = require('./storage');
 const { calculateNextDue } = require('./dateUtils');
 
-function createHabit(id, title, frequencyType, intervalday, customdays, counter, incrementation, projectId = "default", startDate = null, notes = "") {
+function createHabit(id, title, frequencyType, intervalday, customdays, counter, incrementation, projectId = "default", startDate = null, notes = "", color = "default", belongs = "whole day") {
     const today = new Date().toISOString().split('T')[0];
     
-    // Use provided startDate or default to today
     const habitStartDate = startDate || today;
-    
-    // Calculate nextDue based on start date (not today)
     const nextDue = calculateNextDue(frequencyType, intervalday, customdays, habitStartDate);
     
     const newHabit = new Habit(
         id, title, frequencyType, intervalday, customdays, counter, incrementation, projectId,
-        null, nextDue, true, 0, 0, [], true, today, notes, "medium", habitStartDate  // ✅ Changed "" to notes
+        null, nextDue, true, 0, 0, [], true, today, notes, belongs, habitStartDate, color  // ✅ CHANGE "medium" to belongs
     );
     
     saveHabit(newHabit);
