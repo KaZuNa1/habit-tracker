@@ -6,15 +6,10 @@ const { calculateNextDue, calculateNextDueAfterCompletion, checkIfCustomWeekdays
 // ===== DOM ELEMENTS =====
 const showFormButton = document.getElementById('createHabitButton');
 const toggleViewButton = document.getElementById('toggleViewButton');
-const form = document.getElementById('habitForm');
-const freqInput = document.getElementById('freqInput');
+
+
 const displayArea = document.getElementById('habitDisplayArea');
-const counterCheckbox = document.getElementById('counter_checkbox');
-const noteCheckbox = document.getElementById('note_checkbox'); 
-const startDateInput = document.getElementById('startDate');
-const projectInput = document.getElementById('projectInput');
-const colorInput = document.getElementById('colorInput'); 
-const belongsInput = document.getElementById('belongsInput'); 
+
 
 // ===== TOGGLE STATE =====
 let showAllHabits = false; // ✅ ADD THIS VARIABLE
@@ -574,7 +569,7 @@ function saveEditedHabit(originalHabit) {
     let newIncrementation = 0;
     
     if (document.getElementById('editCounterCheckbox').checked) {
-        newCounter = parseInt(document.getElementById('editCounter').value) || 0;
+        newCounter = parseInt(document.getElementById('editCounter').value) || 0; 
         newIncrementation = parseInt(document.getElementById('editIncrementation').value) || 1;
     }
     
@@ -606,6 +601,274 @@ function saveEditedHabit(originalHabit) {
     closeEditModal();
     loadHabits();
 }
+
+// ===== CREATE HABIT MODAL FUNCTIONS =====
+function openCreateModal() {
+    const modal = document.createElement('div');
+    modal.id = 'createModal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    `;
+
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background-color: white;
+        padding: 20px;
+        border-radius: 5px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+    `;
+
+    modalContent.innerHTML = `
+        <h2>Create New Habit</h2>
+        
+        <label for="modalTitleInput">Habit Title:</label>
+        <input type="text" id="modalTitleInput" placeholder="e.g. Drink Water" required />
+        <br><br>
+
+        <label for="modalProjectInput">Project Name:</label>
+        <input type="text" id="modalProjectInput" placeholder="e.g. Health, Fitness, Work" />
+        <br><br>
+
+        <label for="modalColorInput">Color:</label>
+        <select id="modalColorInput">
+            <option value="default">Default (Gray)</option>
+            <option value="violet">Violet</option>
+            <option value="red">Red</option>
+            <option value="green">Green</option>
+            <option value="blue">Blue</option>
+            <option value="orange">Orange</option>
+            <option value="pink">Pink</option>
+            <option value="cyan">Cyan</option>
+            <option value="yellow">Yellow</option>
+            <option value="purple">Purple</option>
+        </select>
+        <br><br>
+
+        <label for="modalBelongsInput">Belongs to:</label>
+        <select id="modalBelongsInput">
+            <option value="whole day">Whole Day</option>
+            <option value="morning">Morning</option>
+            <option value="main">Main</option>
+            <option value="evening">Evening</option>
+        </select>
+        <br><br>
+
+        <label for="modalFreqInput">Frequency Type:</label>
+        <select id="modalFreqInput" required>
+            <option value="">-- Select Frequency --</option>
+            <option value="daily">Daily</option>
+            <option value="interval">Interval</option>
+            <option value="custom_weekdays">Weekly</option>
+        </select>
+        <br><br>
+
+        <div id="modalDailySection" style="display: none;">
+            <p>Daily habit - no additional settings needed</p>
+            <br>
+        </div>
+
+        <div id="modalIntervalSection" style="display: none;">
+            <label for="modalIntervalDay">Every how many days?</label>
+            <input type="number" id="modalIntervalDay" min="1" value="1">
+            <br><br>
+        </div>
+
+        <div id="modalCustomSection" style="display: none;">
+            <label>Select weekdays:</label><br>
+            <input type="checkbox" id="modalMonday" value="monday"> Monday<br>
+            <input type="checkbox" id="modalTuesday" value="tuesday"> Tuesday<br>
+            <input type="checkbox" id="modalWednesday" value="wednesday"> Wednesday<br>
+            <input type="checkbox" id="modalThursday" value="thursday"> Thursday<br>
+            <input type="checkbox" id="modalFriday" value="friday"> Friday<br>
+            <input type="checkbox" id="modalSaturday" value="saturday"> Saturday<br>
+            <input type="checkbox" id="modalSunday" value="sunday"> Sunday<br>
+            <br>
+        </div>
+
+        <label for="modalStartDate">Start Date:</label>
+        <input type="date" id="modalStartDate" required />
+        <br><br>
+
+        <label for="modalCounterCheckbox">Need counter?</label>
+        <input type="checkbox" id="modalCounterCheckbox">
+        <br><br>
+
+        <div id="modalCounterSection" style="display: none;">
+            <label for="modalCounterValue">Counter start value:</label>
+            <input type="number" id="modalCounterValue" value="0">
+            <br><br>
+            <label for="modalIncrementationValue">Incrementation value:</label>
+            <input type="number" id="modalIncrementationValue" value="1">
+            <br><br>
+        </div>
+
+        <label for="modalNoteCheckbox">Want to write note?</label>
+        <input type="checkbox" id="modalNoteCheckbox">
+        <br><br>
+
+        <div id="modalNoteSection" style="display: none;">
+            <label for="modalNoteValue">Note:</label>
+            <textarea id="modalNoteValue" placeholder="Write your note here..." rows="3" cols="40"></textarea>
+            <br><br>
+        </div>
+
+        <button type="button" id="createHabitBtn">Create Habit</button>
+        <button type="button" id="cancelCreateBtn">Cancel</button>
+    `;
+
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    // Set default start date to today
+    const today = getTodayDate();
+    document.getElementById('modalStartDate').value = today;
+
+    // Setup event listeners
+    setupCreateModalEventListeners();
+
+    // Close modal when clicking outside
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            closeCreateModal();
+        }
+    };
+}
+
+function setupCreateModalEventListeners() {
+    // Frequency type change
+    document.getElementById('modalFreqInput').addEventListener('change', function() {
+        const selectedValue = this.value;
+        
+        // Hide all sections
+        document.getElementById('modalDailySection').style.display = 'none';
+        document.getElementById('modalIntervalSection').style.display = 'none';
+        document.getElementById('modalCustomSection').style.display = 'none';
+        
+        // Show relevant section
+        if (selectedValue === 'daily') {
+            document.getElementById('modalDailySection').style.display = 'block';
+        } else if (selectedValue === 'interval') {
+            document.getElementById('modalIntervalSection').style.display = 'block';
+        } else if (selectedValue === 'custom_weekdays') {
+            document.getElementById('modalCustomSection').style.display = 'block';
+        }
+    });
+
+    // Counter checkbox
+    document.getElementById('modalCounterCheckbox').addEventListener('change', function() {
+        const counterSection = document.getElementById('modalCounterSection');
+        counterSection.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Note checkbox
+    document.getElementById('modalNoteCheckbox').addEventListener('change', function() {
+        const noteSection = document.getElementById('modalNoteSection');
+        noteSection.style.display = this.checked ? 'block' : 'none';
+    });
+
+    // Create button
+    document.getElementById('createHabitBtn').onclick = createHabitFromModal;
+    
+    // Cancel button
+    document.getElementById('cancelCreateBtn').onclick = closeCreateModal;
+}
+
+function closeCreateModal() {
+    const modal = document.getElementById('createModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function createHabitFromModal() {
+    const title = document.getElementById('modalTitleInput').value;
+    const freq = document.getElementById('modalFreqInput').value;
+    const startDate = document.getElementById('modalStartDate').value;
+    const projectName = document.getElementById('modalProjectInput').value.trim() || 'default';
+    const selectedColor = document.getElementById('modalColorInput').value || 'default';
+    const selectedBelongs = document.getElementById('modalBelongsInput').value || 'whole day';
+    
+    // Validate required fields
+    if (!title || !freq) {
+        alert('Please fill in all required fields');
+        return;
+    }
+    
+    let intervalday = null;
+    let customdays = '';
+
+    if (freq === 'interval') {
+        intervalday = Math.max(1, parseInt(document.getElementById('modalIntervalDay').value) || 1);
+    }
+
+    if (freq === 'custom_weekdays') {
+        customdays = getSelectedModalWeekdays();
+    }
+
+    let counter = 0;
+    let incrementation = 0; 
+
+    if (document.getElementById('modalCounterCheckbox').checked) {
+        counter = parseInt(document.getElementById('modalCounterValue').value) || 0;
+        incrementation = parseInt(document.getElementById('modalIncrementationValue').value) || 1;
+    }
+
+    let note = '';
+    if (document.getElementById('modalNoteCheckbox').checked) {
+        note = document.getElementById('modalNoteValue').value || '';
+    }
+
+    try {
+        createHabit(
+            Date.now(),
+            title,
+            freq,
+            intervalday,
+            customdays,
+            counter,
+            incrementation,
+            projectName,
+            startDate,
+            note,
+            selectedColor,
+            selectedBelongs
+        );
+        
+        closeCreateModal();
+        loadHabits();
+        
+    } catch (error) {
+        console.error('Error creating habit:', error);
+        alert('Error creating habit: ' + error.message);
+    }
+}
+
+function getSelectedModalWeekdays() {
+    const weekdays = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const selected = [];
+    
+    weekdays.forEach(day => {
+        const checkbox = document.getElementById('modal' + day.charAt(0).toUpperCase() + day.slice(1));
+        if (checkbox && checkbox.checked) {
+            selected.push(day);
+        }
+    });
+    
+    return selected.join(',');
+}
+
 
 function openEditModal(habit) {
     const modal = document.createElement('div');
@@ -751,14 +1014,10 @@ function openEditModal(habit) {
 }
 
 // ===== EVENT LISTENERS =====
+// ===== NEW CODE - USE THIS =====
 showFormButton.addEventListener('click', function () {
-    form.style.display = 'block';
-    hideAllConditionalSections();
-    
-    // Set default start date to today when form opens
-    startDateInput.value = getTodayDate();
+    openCreateModal(); // ✅ Simply call the modal function
 });
-
 // ===== TOGGLE VIEW EVENT LISTENER =====
 toggleViewButton.addEventListener('click', function() {
     showAllHabits = !showAllHabits; // Flip the state
@@ -770,94 +1029,8 @@ toggleViewButton.addEventListener('click', function() {
     loadHabits();
 });
 
-document.getElementById('cancelFormButton').addEventListener('click', function() {
-    form.reset(); // Clear the form
-    hideAllConditionalSections(); // Hide frequency sections
-    form.style.display = 'none'; // Hide the form
-});
 
-freqInput.addEventListener('change', function () {
-    const selectedValue = this.value;
-    hideAllFrequencySections();
-    
-    if (selectedValue === 'daily') {
-        showSection(dailySection);
-    } else if (selectedValue === 'interval') {
-        showSection(intervalSection);
-    } else if (selectedValue === 'custom_weekdays') {
-        showSection(customSection);
-    }
-});
 
-counterCheckbox.addEventListener('change', function() {
-    counterSection.style.display = this.checked ? 'block' : 'none';
-});
-
-noteCheckbox.addEventListener('change', function() {
-    noteSection.style.display = this.checked ? 'block' : 'none';
-});
-
-form.addEventListener('submit', function (e) {
-    e.preventDefault();
-
-    const title = document.getElementById('titleInput').value;
-    const freq = document.getElementById('freqInput').value;
-    const startDate = startDateInput.value;
-    const projectName = projectInput.value.trim() || 'default'; 
-    const selectedColor = colorInput.value || 'default'; 
-    const selectedBelongs = belongsInput.value || 'whole day'; 
-    
-    let intervalday = null;
-    let customdays = '';
-
-    if (freq === 'interval') {
-        intervalday = Math.max(1, parseInt(document.getElementById('intervalday').value) || 1);
-    }
-
-    if (freq === 'custom_weekdays') {
-        customdays = getSelectedWeekdays();
-    }
-
-    let counter = 0;
-    let incrementation = 0; 
-
-    if (counterCheckbox.checked) {
-        counter = parseInt(document.getElementById('counter_value').value) || 0;
-        incrementation = parseInt(document.getElementById('incrementation_value').value) || 1;
-    }
-
-    let note = '';
-if (noteCheckbox.checked) {
-    note = document.getElementById('note_value').value || '';
-}
-console.log('Note value from form:', note); // ✅ ADD THIS DEBUG LINE
-    try {
-        createHabit(
-            Date.now(),
-            title,
-            freq,
-            intervalday,
-            customdays,
-            counter,
-            incrementation,
-            projectName,
-            startDate,
-            note,
-            selectedColor,
-            selectedBelongs 
-        );
-        
-        loadHabits();
-        
-        form.reset();
-        hideAllConditionalSections();
-        form.style.display = 'none';
-        
-    } catch (error) {
-        console.error('Error creating habit:', error);
-        alert('Error creating habit: ' + error.message);
-    }
-});
 
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', loadHabits);
