@@ -1,0 +1,127 @@
+/* ===== CSS RESET ===== */
+/* Remove default browser styles to ensure consistency */
+
+* {
+  margin: 0;           /* Remove default margins */
+  padding: 0;          /* Remove default padding */
+  box-sizing: border-box;  /* Include padding/border in element width */
+}
+
+*::before,
+*::after {
+  box-sizing: border-box;  /* Apply to pseudo-elements too */
+}
+
+/* Remove default styling from common elements */
+ul, ol {
+  list-style: none;    /* Remove bullet points */
+}
+
+button {
+  border: none;        /* Remove default button borders */
+  background: none;    /* Remove default button background */
+  cursor: pointer;     /* Make buttons feel clickable */
+}
+
+input, textarea, select {
+  font-family: inherit;  /* Use same font as parent */
+  font-size: inherit;    /* Use same font size as parent */
+}
+
+/* ===== GLOBAL VARIABLES ===== */
+/* CSS Custom Properties - like variables in programming */
+
+:root {
+  /* Color Palette */
+  --primary-color: #007bff;      /* Main blue color */
+  --secondary-color: #6c757d;    /* Gray color */
+  --success-color: #28a745;      /* Green for success */
+  --warning-color: #ffc107;      /* Yellow for warnings */
+  --danger-color: #dc3545;       /* Red for errors */
+  --info-color: #17a2b8;         /* Cyan for info */
+  
+  /* Neutral Colors */
+  --white: #ffffff;
+  --light-gray: #f8f9fa;
+  --medium-gray: #e9ecef;
+  --dark-gray: #6c757d;
+  --black: #212529;
+  
+  /* Spacing System (consistent spacing throughout app) */
+  --space-xs: 4px;     /* Extra small spacing */
+  --space-sm: 8px;     /* Small spacing */
+  --space-md: 16px;    /* Medium spacing */
+  --space-lg: 24px;    /* Large spacing */
+  --space-xl: 32px;    /* Extra large spacing */
+  --space-xxl: 48px;   /* Extra extra large spacing */
+  
+  /* Border Radius (rounded corners) */
+  --radius-sm: 4px;    /* Slightly rounded */
+  --radius-md: 8px;    /* Medium rounded */
+  --radius-lg: 12px;   /* More rounded */
+  --radius-xl: 16px;   /* Very rounded */
+  
+  /* Box Shadows (for depth/elevation effect) */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);          /* Subtle shadow */
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);          /* Medium shadow */
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);        /* Large shadow */
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);       /* Extra large shadow */
+}
+
+/* ===== BODY AND TYPOGRAPHY ===== */
+
+body {
+  /* Font Stack - tries first font, falls back to next if not available */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  
+  /* Typography Settings */
+  font-size: 16px;                    /* Base font size */
+  line-height: 1.6;                   /* Space between lines (1.6 = 160% of font size) */
+  color: var(--black);                /* Default text color */
+  font-weight: 400;                   /* Normal font weight */
+  
+  /* Layout Settings */
+  margin: 0;                          /* Remove default body margin */
+  padding: 0;                         /* Remove default body padding */
+  min-height: 100vh;                  /* Minimum height = full viewport height */
+  
+  /* Background */
+  background-color: var(--light-gray); /* Light gray background */
+  
+  /* Performance Optimizations */
+  -webkit-font-smoothing: antialiased;    /* Smooth fonts on Mac */
+  -moz-osx-font-smoothing: grayscale;     /* Smooth fonts on Mac Firefox */
+}
+
+/* Heading Styles */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;                   /* Semi-bold headings */
+  line-height: 1.3;                   /* Tighter line height for headings */
+  margin-bottom: var(--space-md);     /* Space below headings */
+  color: var(--black);                /* Dark color for headings */
+}
+
+h1 { font-size: 2.5rem; }            /* 40px if base is 16px */
+h2 { font-size: 2rem; }              /* 32px */
+h3 { font-size: 1.5rem; }            /* 24px */
+h4 { font-size: 1.25rem; }           /* 20px */
+h5 { font-size: 1rem; }              /* 16px */
+h6 { font-size: 0.875rem; }          /* 14px */
+
+/* Paragraph Styles */
+p {
+  margin-bottom: var(--space-md);     /* Space below paragraphs */
+  line-height: 1.6;                   /* Easy to read line spacing */
+}
+
+/* Link Styles */
+a {
+  color: var(--primary-color);        /* Blue links */
+  text-decoration: none;              /* Remove underlines */
+  transition: color 0.2s ease;        /* Smooth color transition */
+}
+
+a:hover {
+  color: #0056b3;                     /* Darker blue on hover */
+  text-decoration: underline;         /* Underline on hover */
+}
