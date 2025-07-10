@@ -6,131 +6,74 @@
 </head>
 
 <body>
-  <h1>Habit Tracker</h1>
-  <button id="createHabitButton">create habit</button>
-  <button id="toggleViewButton">Show All Habits</button> 
-<!-- 🚀 FORM SECTION -->
- <!--
-<form id="habitForm" style="display: none;">
-  <label for="titleInput">Habit Title:</label>
-  <input type="text" id="titleInput" placeholder="e.g. Drink Water" required />
+  <!-- ✅ APP CONTAINER -->
+  <div class="app-container">
+    
+    <!-- ✅ HEADER SECTION -->
+    <header class="app-header">
+      <h1 class="app-title">Habit Tracker</h1>
+      <div class="app-controls">
+        <button id="createHabitButton" class="btn btn-primary">Create Habit</button>
+        <button id="toggleViewButton" class="btn btn-secondary">Show All Habits</button>
+      </div>
+    </header>
 
-  <br /><br />
+    <!-- ✅ MAIN DASHBOARD -->
+    <main class="dashboard-container">
+      <div class="dashboard-grid" id="habitDisplayArea">
+        
+        <!-- MORNING COLUMN -->
+        <div class="time-column" id="morning-column">
+          <div class="column-header">
+            <span class="column-icon">🌅</span>
+            <h3 class="column-title">Morning</h3>
+            <span class="column-time">6AM - 12PM</span>
+          </div>
+          <div class="habits-list" id="morning-habits">
+            <!-- Morning habits will appear here -->
+          </div>
+        </div>
 
-  <label for="projectInput">Project Name:</label>
-  <input type="text" id="projectInput" placeholder="e.g. Health, Fitness, Work" />
+        <!-- MAIN COLUMN -->
+        <div class="time-column" id="main-column">
+          <div class="column-header">
+            <span class="column-icon">☀️</span>
+            <h3 class="column-title">Main</h3>
+            <span class="column-time">12PM - 6PM</span>
+          </div>
+          <div class="habits-list" id="main-habits">
+            <!-- Main habits will appear here -->
+          </div>
+        </div>
 
-   <br /><br />
+        <!-- EVENING COLUMN -->
+        <div class="time-column" id="evening-column">
+          <div class="column-header">
+            <span class="column-icon">🌆</span>
+            <h3 class="column-title">Evening</h3>
+            <span class="column-time">6PM - 12AM</span>
+          </div>
+          <div class="habits-list" id="evening-habits">
+            <!-- Evening habits will appear here -->
+          </div>
+        </div>
 
-   <label for="colorInput">Color:</label>
-  <select id="colorInput">
-    <option value="default">Default (Gray)</option>
-    <option value="violet">Violet</option>
-    <option value="red">Red</option>
-    <option value="green">Green</option>
-    <option value="blue">Blue</option>
-    <option value="orange">Orange</option>
-    <option value="pink">Pink</option>
-    <option value="cyan">Cyan</option>
-    <option value="yellow">Yellow</option>
-    <option value="purple">Purple</option>
-  </select>
+        <!-- WHOLE DAY COLUMN -->
+        <div class="time-column" id="wholeday-column">
+          <div class="column-header">
+            <span class="column-icon">🌙</span>
+            <h3 class="column-title">Whole Day</h3>
+            <span class="column-time">All Day</span>
+          </div>
+          <div class="habits-list" id="wholeday-habits">
+            <!-- Whole day habits will appear here -->
+          </div>
+        </div>
 
-  <br /><br />
+      </div>
+    </main>
 
-  <label for="belongsInput">Belongs to:</label>
-<select id="belongsInput">
-  <option value="whole day">Whole Day</option>
-  <option value="morning">Morning</option>
-  <option value="main">Main</option>
-  <option value="evening">Evening</option>
-</select>
-<br /><br />
-
-  <label for="freqInput">Frequency Type:</label>
-  <select id="freqInput" required>
-    <option value="">-- Select Frequency --</option>
-    <option value="daily">Daily</option>
-    <option value="interval">Interval</option>
-    <option value="custom_weekdays">Weekly</option>
-  </select>
-
-  <label for="daily" id="daily_sec" style="display: none;">Daily</label>
-  <br></br>
-
-  <br /><br />
-  <div id="intervalday_section" style="display: none;">
-  <label for="intervalday">intervalday:  </label>
-  <input type="number" id="intervalday">
-  <br></br>
   </div>
-
-  <div id="custom_weekdays_section" style="display: none;">
-      <label>Custom weekdays:</label><br>
-<input type="checkbox" id="monday" name="weekdays" value="monday">
-<label for="monday">Monday</label><br>
-
-<input type="checkbox" id="tuesday" name="weekdays" value="tuesday">
-<label for="tuesday">Tuesday</label><br>
-
-<input type="checkbox" id="wednesday" name="weekdays" value="wednesday">
-<label for="wednesday">Wednesday</label><br>
-
-<input type="checkbox" id="thursday" name="weekdays" value="thursday">
-<label for="thursday">Thursday</label><br>
-
-<input type="checkbox" id="friday" name="weekdays" value="friday">
-<label for="friday">Friday</label><br>
-
-<input type="checkbox" id="saturday" name="weekdays" value="saturday">
-<label for="saturday">Saturday</label><br>
-
-<input type="checkbox" id="sunday" name="weekdays" value="sunday">
-<label for="sunday">Sunday</label><br>
-  </div>
-
-  
-  <br />
-  <label for="startDate">Start Date:</label>
-  <input type="date" id="startDate" required />
-  <br /><br />
-
-<label for="needCounter">Need counter?</label>
-<input type="checkbox" id="counter_checkbox">
-<br></br>
-
-
-<div id="counter_section" style="display: none;">
-    <label for="counter">Counter start value =>  </label>
-  <input type="number" id="counter_value">
-  <br></br>
-
-  <label for="incrementation">incrementation value =>: </label>
-  <input type="number" id="incrementation_value">
-  <br></br>
-</div>
-
-
-  <label for="needNote">Want to write note?</label>
-<input type="checkbox" id="note_checkbox">
-<br></br>
-
-<div id="note_section" style="display: none;">
-    <label for="note_value">Note: </label>
-    <textarea id="note_value" placeholder="Write your note here..." rows="3" cols="40"></textarea>
-    <br></br>
-</div>
-
-  <button type="submit">Create</button>
-  <button type="button" id="cancelFormButton">Cancel</button>
-</form>
-
--->
-
-<!-- Where created habits show up -->
-<div id="habitDisplayArea"></div>
-
-
 
   <script src="renderer.js"></script>
 </body>
