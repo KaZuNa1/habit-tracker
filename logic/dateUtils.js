@@ -128,15 +128,11 @@ function checkIfCustomWeekdaysStreakBroken(lastCompletionDate, todayDate, custom
 }
 
 function recalculateNextDueFromStart(habit, currentDate) {
-    // ✅ NEW FUNCTION: Calculate next due from start date, find first valid date >= currentDate
-    
     if (currentDate < habit.startDate) {
-        // Haven't started yet - next due is start date
         return habit.startDate;
     }
     
     if (habit.frequencyType === 'daily') {
-        // Daily: next due is today (if not completed) or tomorrow (if completed today)
         const isCompletedToday = habit.completionHistory && 
             habit.completionHistory[habit.completionHistory.length - 1] === currentDate;
         
@@ -145,36 +141,57 @@ function recalculateNextDueFromStart(habit, currentDate) {
             tomorrow.setDate(tomorrow.getDate() + 1);
             return tomorrow.toISOString().split('T')[0];
         } else {
-            return currentDate; // Due today
+            return currentDate;
         }
         
     } else if (habit.frequencyType === 'interval') {
-    // Interval: find next valid date from start date
+        // ✅ NEW: Pattern-based calculation for intervals
+        return calculateIntervalPatternNextDue(habit, currentDate);
+        
+    } else if (habit.frequencyType === 'custom_weekdays') {
+        return getNextValidWeekday(new Date(currentDate), habit.customdays).toISOString().split('T')[0];
+    }
+    
+    return currentDate;
+}
+
+// ✅ NEW FUNCTION: Calculate next due based on creation pattern
+function calculateIntervalPatternNextDue(habit, currentDate) {
     const startDate = new Date(habit.startDate);
     const current = new Date(currentDate);
     const intervalDays = parseInt(habit.intervalday);
     
-    // If never completed, first due date is start date
-    if (!habit.completionHistory || habit.completionHistory.length === 0) {
-        if (currentDate >= habit.startDate) {
-            return habit.startDate; // Due on start date
+    // Calculate days since creation
+    const daysSinceStart = Math.floor((current - startDate) / (1000 * 60 * 60 * 24));
+    
+    // ✅ FIX: Check if today is already a pattern day
+    if (daysSinceStart >= 0 && daysSinceStart % intervalDays === 0) {
+        // Today IS a pattern day - check if completed
+        const isCompletedToday = habit.completionHistory && 
+            habit.completionHistory[habit.completionHistory.length - 1] === currentDate;
+        
+        if (isCompletedToday) {
+            // Already completed today, next due is in intervalDays
+            const nextDueDate = new Date(current);
+            nextDueDate.setDate(current.getDate() + intervalDays);
+            return nextDueDate.toISOString().split('T')[0];
         } else {
-            return habit.startDate; // Not started yet
+            // Not completed yet, due TODAY
+            return currentDate;
         }
     }
     
-    // If completed before, calculate next interval from last completion
-    const lastCompletion = habit.completionHistory[habit.completionHistory.length - 1];
-    const nextDue = new Date(lastCompletion);
-    nextDue.setDate(nextDue.getDate() + intervalDays);
-    
-    return nextDue.toISOString().split('T')[0];
-} else if (habit.frequencyType === 'custom_weekdays') {
-        // Custom weekdays: find next valid weekday >= currentDate
-        return getNextValidWeekday(new Date(currentDate), habit.customdays).toISOString().split('T')[0];
+    // ✅ FIX: Find the next pattern day from start date
+    let nextPatternDay = intervalDays; // Start with first interval
+    while (nextPatternDay <= daysSinceStart) {
+        nextPatternDay += intervalDays;
     }
     
-    return currentDate; // Fallback
+    // Calculate the actual date
+    const nextDueDate = new Date(startDate);
+    nextDueDate.setDate(startDate.getDate() + nextPatternDay);
+    
+    return nextDueDate.toISOString().split('T')[0];
 }
 
 module.exports = {
@@ -183,5 +200,6 @@ module.exports = {
     getNextValidWeekday,
     getNextValidWeekdayAfterCompletion,
     checkIfCustomWeekdaysStreakBroken,
-    recalculateNextDueFromStart  // ✅ Export the new function
+    recalculateNextDueFromStart,
+    calculateIntervalPatternNextDue  // ✅ ADD THIS
 };

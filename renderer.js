@@ -1,7 +1,7 @@
 // ===== IMPORTS =====
 const { createHabit } = require('./logic/habitManager');
 const { readHabits, removeHabit, writeHabits } = require('./logic/storage');
-const { calculateNextDue, calculateNextDueAfterCompletion, checkIfCustomWeekdaysStreakBroken, recalculateNextDueFromStart } = require('./logic/dateUtils');
+const { calculateNextDue, calculateNextDueAfterCompletion, checkIfCustomWeekdaysStreakBroken, recalculateNextDueFromStart, calculateIntervalPatternNextDue } = require('./logic/dateUtils');
 
 // ===== DOM ELEMENTS =====
 const showFormButton = document.getElementById('createHabitButton');
@@ -313,7 +313,6 @@ function calculateStreak(completionHistory, todayDate, lastDueDate, frequencyTyp
 function autoUpdateStreakIfBroken(habit) {
     const today = getTodayDate();
     
-    // Don't check streak if habit hasn't started yet
     if (today < habit.startDate) {
         return habit;
     }
@@ -333,7 +332,9 @@ function autoUpdateStreakIfBroken(habit) {
     if (habit.frequencyType === 'daily') {
         streakBroken = daysSinceLastCompletion > 1;
     } else if (habit.frequencyType === 'interval') {
-        streakBroken = today > habit.nextDue;
+        // ✅ UPDATED: Check if we missed the scheduled due date
+        const scheduledNextDue = calculateIntervalPatternNextDue(habit, lastCompletion);
+        streakBroken = today > scheduledNextDue;
     } else if (habit.frequencyType === 'custom_weekdays') {
         streakBroken = checkIfCustomWeekdaysStreakBroken(lastCompletion, today, habit.customdays);
     }
@@ -342,11 +343,11 @@ function autoUpdateStreakIfBroken(habit) {
         console.log(`Streak broken for ${habit.title}! Resetting to 0. Days gap: ${daysSinceLastCompletion}`);
         habit.currentStreak = 0;
         
-        // When streak is broken, recalculate next due from today
         if (habit.frequencyType === 'custom_weekdays') {
             const newNextDue = calculateNextDue(habit.frequencyType, habit.intervalday, habit.customdays, today);
             habit.nextDue = newNextDue;
         }
+        // ✅ For intervals, nextDue will be recalculated by the pattern function
     }
     
     return habit;
