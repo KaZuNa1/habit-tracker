@@ -74,6 +74,58 @@ function getSelectedWeekdays() {
     return selected.join(',');
 }
 
+// ===== NOTES MODAL FUNCTIONS =====
+
+function showNotesModal(habitId, habitTitle) {
+    // Get the habit data
+    const habits = readHabits();
+    const habit = habits.find(h => h.id == habitId);
+    
+    if (!habit || !habit.notes) {
+        console.warn('No notes found for habit');
+        return;
+    }
+    
+    // Create modal
+    const modal = document.createElement('div');
+    modal.id = 'notesModal';
+    modal.className = 'notes-modal';
+    
+    modal.innerHTML = `
+        <div class="notes-modal-content">
+            <div class="notes-modal-header">
+                <h3 class="notes-modal-title">Notes: ${habitTitle}</h3>
+                <button class="notes-modal-close" onclick="closeNotesModal()">&times;</button>
+            </div>
+            <div class="notes-content">${habit.notes}</div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Close on outside click
+    modal.onclick = (e) => {
+        if (e.target === modal) {
+            closeNotesModal();
+        }
+    };
+    
+    // Close on Escape key
+    document.addEventListener('keydown', function escapeHandler(e) {
+        if (e.key === 'Escape') {
+            closeNotesModal();
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    });
+}
+
+function closeNotesModal() {
+    const modal = document.getElementById('notesModal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
 function getSelectedEditWeekdays() {
     const selected = [];
     WEEKDAYS.forEach(day => {
@@ -127,6 +179,101 @@ function isHabitCompletedToday(habit) {
     
     const lastCompletion = habit.completionHistory[habit.completionHistory.length - 1];
     return lastCompletion === today;
+}
+// ===== COLUMN MANAGEMENT FUNCTIONS =====
+
+function clearAllColumns() {
+    document.getElementById('morning-habits').innerHTML = '';
+    document.getElementById('main-habits').innerHTML = '';
+    document.getElementById('evening-habits').innerHTML = '';
+    document.getElementById('wholeday-habits').innerHTML = '';
+}
+
+function showEmptyState() {
+    const columns = ['morning-habits', 'main-habits', 'evening-habits', 'wholeday-habits'];
+    columns.forEach(columnId => {
+        document.getElementById(columnId).innerHTML = '<p class="empty-message">No habits yet</p>';
+    });
+}
+
+function getColumnContainer(belongs) {
+    const columnMap = {
+        'morning': 'morning-habits',
+        'main': 'main-habits', 
+        'evening': 'evening-habits',
+        'whole day': 'wholeday-habits'
+    };
+    
+    return document.getElementById(columnMap[belongs] || 'wholeday-habits');
+}
+
+function displayHabitInColumn(habit) {
+    // Get the correct column container
+    const columnContainer = getColumnContainer(habit.belongs);
+    
+    // Create the habit element
+    const display = document.createElement('div');
+    display.setAttribute('data-habit-id', habit.id);
+    display.className = 'habit-item';
+    
+    // ✅ ADD BACK ALL THE MISSING INFORMATION
+    display.innerHTML = `
+        <div class="habit-title">${habit.title}</div>
+        <div class="habit-info">
+            <strong>Project:</strong> ${habit.projectId}<br>
+            <strong>Frequency:</strong> ${habit.getFrequencyDisplay()}<br>
+            ${habit.counter !== 0 || habit.incrementation !== 0 ? `<strong>Counter:</strong> ${habit.counter} (+${habit.incrementation})<br>` : ''}
+            <strong>Start Date:</strong> ${habit.startDate}<br>
+            <strong>Last Completed:</strong> ${habit.lastCompleted || 'Never'}<br>
+            <strong>Next Due:</strong> ${habit.nextDue}<br>
+            <strong>Current Streak:</strong> ${habit.currentStreak}<br>
+            <strong>Total Completed:</strong> ${habit.totalCompleted}<br>
+            ${habit.notes && habit.notes.trim() !== '' ? `
+                <div class="notes-section">
+                    <span class="notes-label">Notes:</span>
+                    <button class="show-notes-btn" onclick="showNotesModal('${habit.id}', '${habit.title}')">Show</button>
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    // Add checkbox and controls (same as before)
+    const isDue = isHabitDueToday(habit);
+    const isCompletedToday = isHabitCompletedToday(habit);
+    
+    const completeCheckbox = document.createElement('input');
+    completeCheckbox.type = 'checkbox';
+    completeCheckbox.id = `complete-${habit.id}`;
+    completeCheckbox.checked = isCompletedToday;
+    
+    const shouldShowCheckbox = isDue || isCompletedToday;
+    completeCheckbox.disabled = !shouldShowCheckbox;
+    completeCheckbox.style.display = shouldShowCheckbox ? 'inline' : 'none';
+    
+    const checkboxLabel = createCheckboxLabel(habit, isDue, isCompletedToday);
+    
+    const editBtn = document.createElement('button');
+    editBtn.textContent = 'Edit';
+    editBtn.onclick = () => openEditModal(habit);
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.onclick = () => deleteHabitOptimized(habit);
+    
+    completeCheckbox.onclick = () => markHabitComplete(habit);
+
+    // Add controls to habit
+    const controlsDiv = document.createElement('div');
+    controlsDiv.className = 'habit-controls';
+    controlsDiv.appendChild(completeCheckbox);
+    controlsDiv.appendChild(checkboxLabel);
+    controlsDiv.appendChild(editBtn);
+    controlsDiv.appendChild(deleteBtn);
+    
+    display.appendChild(controlsDiv);
+    
+    // Add to the correct column
+    columnContainer.appendChild(display);
 }
 
 // ===== STREAK CALCULATION =====
@@ -333,43 +480,72 @@ function updateSingleHabitDisplay(updatedHabit) {
         return;
     }
     
-    // Clear content but keep the element in place
-    existingDisplay.innerHTML = updatedHabit.info();
+    // Update the habit info (title and details)
+    const titleElement = existingDisplay.querySelector('.habit-title');
+    const infoElement = existingDisplay.querySelector('.habit-info');
     
-    // Create checkbox
-    const completeCheckbox = document.createElement('input');
-    completeCheckbox.type = 'checkbox';
-    completeCheckbox.id = `complete-${updatedHabit.id}`;
+    if (titleElement) {
+        titleElement.textContent = updatedHabit.title;
+    }
     
-    const isDue = isHabitDueToday(updatedHabit);
-    const isCompletedToday = isHabitCompletedToday(updatedHabit);
+    if (infoElement) {
+    infoElement.innerHTML = `
+        <strong>Project:</strong> ${updatedHabit.projectId}<br>
+        <strong>Frequency:</strong> ${updatedHabit.getFrequencyDisplay()}<br>
+        ${updatedHabit.counter !== 0 || updatedHabit.incrementation !== 0 ? `<strong>Counter:</strong> ${updatedHabit.counter} (+${updatedHabit.incrementation})<br>` : ''}
+        <strong>Start Date:</strong> ${updatedHabit.startDate}<br>
+        <strong>Last Completed:</strong> ${updatedHabit.lastCompleted || 'Never'}<br>
+        <strong>Next Due:</strong> ${updatedHabit.nextDue}<br>
+        <strong>Current Streak:</strong> ${updatedHabit.currentStreak}<br>
+        <strong>Total Completed:</strong> ${updatedHabit.totalCompleted}<br>
+        ${updatedHabit.notes && updatedHabit.notes.trim() !== '' ? `
+            <div class="notes-section">
+                <span class="notes-label">Notes:</span>
+                <button class="show-notes-btn" onclick="showNotesModal('${updatedHabit.id}', '${updatedHabit.title}')">Show</button>
+            </div>
+        ` : ''}
+    `;
+}
+    
+    // ✅ SIMPLE FIX: Rebuild the entire controls section
+    const controlsDiv = existingDisplay.querySelector('.habit-controls');
+    if (controlsDiv) {
+        // Clear old controls
+        controlsDiv.innerHTML = '';
+        
+        // Recreate controls with updated state
+        const isDue = isHabitDueToday(updatedHabit);
+        const isCompletedToday = isHabitCompletedToday(updatedHabit);
+        
+        const completeCheckbox = document.createElement('input');
+        completeCheckbox.type = 'checkbox';
+        completeCheckbox.id = `complete-${updatedHabit.id}`;
+        completeCheckbox.checked = isCompletedToday;
+        
+        const shouldShowCheckbox = isDue || isCompletedToday;
+        completeCheckbox.disabled = !shouldShowCheckbox;
+        completeCheckbox.style.display = shouldShowCheckbox ? 'inline' : 'none';
+        
+        const checkboxLabel = createCheckboxLabel(updatedHabit, isDue, isCompletedToday);
+        
+        const editBtn = document.createElement('button');
+        editBtn.textContent = 'Edit';
+        editBtn.onclick = () => openEditModal(updatedHabit);
 
-    completeCheckbox.checked = isCompletedToday;
-    
-    const shouldShowCheckbox = isDue || isCompletedToday;
-    completeCheckbox.disabled = !shouldShowCheckbox;
-    completeCheckbox.style.display = shouldShowCheckbox ? 'inline' : 'none';
-    
-    // Create label
-    const checkboxLabel = createCheckboxLabel(updatedHabit, isDue, isCompletedToday);
-    
-    // Create buttons
-    const editBtn = document.createElement('button');
-    editBtn.textContent = 'Edit';
-    editBtn.onclick = () => openEditModal(updatedHabit);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.onclick = () => deleteHabitOptimized(updatedHabit);
+        
+        completeCheckbox.onclick = () => markHabitComplete(updatedHabit);
 
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.onclick = () => deleteHabitOptimized(updatedHabit);
+        // Add all controls back
+        controlsDiv.appendChild(completeCheckbox);
+        controlsDiv.appendChild(checkboxLabel);
+        controlsDiv.appendChild(editBtn);
+        controlsDiv.appendChild(deleteBtn);
+    }
     
-    // Add event listener
-    completeCheckbox.onclick = () => markHabitComplete(updatedHabit);
-
-    // Add everything back as inline elements
-    existingDisplay.appendChild(completeCheckbox);
-    existingDisplay.appendChild(checkboxLabel);
-    existingDisplay.appendChild(editBtn);
-    existingDisplay.appendChild(deleteBtn);
+    console.log('Successfully updated habit display in place');
 }
 
 function displayHabit(habit) {
@@ -466,33 +642,29 @@ function loadHabits() {
     const habits = readHabits();
     const today = getTodayDate();
     
-    displayArea.innerHTML = '';
+    // ✅ Clear all columns first
+    clearAllColumns();
     
     if (habits.length === 0) {
-        displayArea.innerHTML = '<p>No habits yet!</p>';
+        showEmptyState();
         return;
     }
     
     habits.forEach(habit => {
-    const oldNextDue = habit.nextDue;
-    habit.nextDue = recalculateNextDueFromStart(habit, today);
-    
-    const updatedHabit = autoUpdateStreakIfBroken(habit);
-    
-    if (oldNextDue !== habit.nextDue || updatedHabit !== habit) {
-        updateHabitInStorage(updatedHabit);
-    }
-    
-    // ✅ SMART SCHEDULING: Only display if due today OR completed today
-    const isDue = isHabitDueToday(updatedHabit);
-    const isCompletedToday = isHabitCompletedToday(updatedHabit);
-    
-    // ✅ NEW: Check toggle state
-if (showAllHabits || isDue || isCompletedToday) {
-    displayHabit(updatedHabit);
-}
-    // If neither due nor completed today, habit is hidden
-});
+        const oldNextDue = habit.nextDue;
+        habit.nextDue = recalculateNextDueFromStart(habit, today);
+        
+        const updatedHabit = autoUpdateStreakIfBroken(habit);
+        
+        if (oldNextDue !== habit.nextDue || updatedHabit !== habit) {
+            updateHabitInStorage(updatedHabit);
+        }
+        
+        // ✅ NEW: Apply smart scheduling filter + sort into columns
+        if (showAllHabits || isHabitDueToday(updatedHabit) || isHabitCompletedToday(updatedHabit)) {
+            displayHabitInColumn(updatedHabit);
+        }
+    });
 }
 
 // ===== EDIT MODAL FUNCTIONS =====
