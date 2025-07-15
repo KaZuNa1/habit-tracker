@@ -1,5 +1,5 @@
 class Habit{
-    constructor(id, title, frequencyType, intervalday, customdays, counter, incrementation, projectId, lastCompleted, nextDue, isActiveToday, currentStreak, totalCompleted, completionHistory, isActive, createdDate, notes, belongs, startDate, color){
+    constructor(id, title, frequencyType, intervalday, customdays, counter, incrementation, projectId, lastCompleted, nextDue, isActiveToday, currentStreak, totalCompleted, completionHistory, isActive, createdDate, notes, belongs, startDate, color, columnIndex){
         this.id = id;
         this.title = title;
         this.frequencyType = frequencyType;
@@ -21,6 +21,7 @@ class Habit{
         this.belongs = belongs || 'whole day';
         this.startDate = startDate;  // ✅ NEW: When habit should start being active
         this.color = color || 'default';
+        this.columnIndex = columnIndex || 999;
     }
     info() {
     let displayInfo = `

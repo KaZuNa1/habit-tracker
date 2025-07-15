@@ -41,7 +41,8 @@ function readHabits() {
         habitData.notes || "",
         habitData.belongs || habitData.priority || "whole day",
         habitData.startDate || habitData.createdDate || new Date().toISOString().split('T')[0] , // ✅ NEW: Default to createdDate for backward compatibility
-        habitData.color || "default"
+        habitData.color || "default",
+        habitData.columnIndex || 999
         
     ));
     

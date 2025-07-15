@@ -47,6 +47,58 @@ function getTodayDate() {
     return new Date().toISOString().split('T')[0];
 }
 
+// ===== COLUMN HELPER FUNCTIONS =====
+
+function getHabitsForColumn(columnName, applyDateFilter = true) {
+    const allHabits = readHabits();
+    let columnHabits = allHabits.filter(habit => habit.belongs === columnName);
+    
+    // Apply smart scheduling filter if requested
+    if (applyDateFilter && !showAllHabits) {
+        columnHabits = columnHabits.filter(habit => {
+            return isHabitDueToday(habit) || isHabitCompletedToday(habit);
+        });
+    }
+    
+    // ✅ Always sort by columnIndex
+    return columnHabits.sort((a, b) => {
+        const indexA = a.columnIndex || 999;
+        const indexB = b.columnIndex || 999;
+        return indexA - indexB;
+    });
+}
+
+function showEmptyColumnMessage(container, columnName) {
+    const columnConfig = {
+        'morning': { name: 'Morning', icon: '🌅' },
+        'main': { name: 'Main', icon: '☀️' },
+        'evening': { name: 'Evening', icon: '🌆' },
+        'whole day': { name: 'Whole Day', icon: '🌙' }
+    };
+    
+    const config = columnConfig[columnName] || { name: 'Unknown', icon: '❓' };
+    
+    if (showAllHabits) {
+        // Show All mode - encourage organization
+        container.innerHTML = `
+            <div class="empty-column-message">
+                <p>${config.icon}</p>
+                <p>No ${config.name.toLowerCase()} habits yet</p>
+                <small>Create habits or drag them here</small>
+            </div>
+        `;
+    } else {
+        // Smart mode - focus message
+        container.innerHTML = `
+            <div class="empty-column-message">
+                <p>${config.icon}</p>
+                <p>Nothing due right now</p>
+                <small>Great job staying on track!</small>
+            </div>
+        `;
+    }
+}
+
 function hideAllFrequencySections() {
     dailySection.style.display = 'none';
     intervalSection.style.display = 'none';
@@ -146,6 +198,139 @@ function updateHabitInStorage(updatedHabit) {
     writeHabits(updatedHabits);
 }
 
+// ===== DRAG & DROP FUNCTIONALITY =====
+let sortableInstances = {}; // Store sortable instances for each column
+
+function initializeDragAndDrop() {
+    // Only enable drag & drop in "Show All" mode
+    if (!showAllHabits) {
+        console.log('Drag & drop disabled in Smart View mode');
+        return;
+    }
+    
+    console.log('Initializing drag & drop for organization mode');
+    
+    // Destroy existing instances
+    destroyDragAndDrop();
+    
+    // Initialize drag & drop for each column
+    const columns = ['morning', 'main', 'evening', 'wholeday'];
+    
+    columns.forEach(columnName => {
+        const columnContainer = document.getElementById(`${columnName}-habits`);
+        
+        if (columnContainer) {
+            sortableInstances[columnName] = Sortable.create(columnContainer, {
+                group: 'habits', // Allow dragging between columns
+                animation: 200,
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                dragClass: 'sortable-drag',
+                
+                // Only allow dragging habit items
+                draggable: '.habit-item',
+                
+                // Handle drag end
+                onEnd: function(evt) {
+                    const sourceColumn = evt.from.id.replace('-habits', '');
+                    const targetColumn = evt.to.id.replace('-habits', '');
+                    
+                    console.log(`Habit moved from ${sourceColumn} to ${targetColumn} (${evt.oldIndex} → ${evt.newIndex})`);
+                    
+                    handleHabitReorder(sourceColumn, targetColumn, evt.oldIndex, evt.newIndex, evt.item);
+                }
+            });
+        }
+    });
+}
+
+function handleHabitReorder(sourceColumn, targetColumn, oldIndex, newIndex, draggedElement) {
+    const habitId = draggedElement.getAttribute('data-habit-id');
+    const habits = readHabits();
+    const draggedHabit = habits.find(h => h.id == habitId);
+    
+    if (!draggedHabit) {
+        console.error('Dragged habit not found!');
+        return;
+    }
+    
+    console.log(`Reordering: "${draggedHabit.title}" from ${sourceColumn} to ${targetColumn}`);
+    
+    if (sourceColumn === targetColumn) {
+        // ✅ SAME COLUMN: Just reorder within column
+        reorderWithinColumn(sourceColumn, draggedHabit.id, newIndex);
+    } else {
+        // ✅ DIFFERENT COLUMN: Move between columns
+        moveBetweenColumns(draggedHabit.id, sourceColumn, targetColumn, newIndex);
+    }
+}
+
+function reorderWithinColumn(columnName, draggedHabitId, newPosition) {
+    const habits = readHabits();
+    const columnHabits = habits.filter(h => h.belongs === columnName);
+    
+    // Sort by current columnIndex
+    columnHabits.sort((a, b) => (a.columnIndex || 999) - (b.columnIndex || 999));
+    
+    // Find the dragged habit and remove it
+    const draggedHabitIndex = columnHabits.findIndex(h => h.id == draggedHabitId);
+    const draggedHabit = columnHabits.splice(draggedHabitIndex, 1)[0];
+    
+    // Insert at new position
+    columnHabits.splice(newPosition, 0, draggedHabit);
+    
+    // Reassign columnIndex values (1, 2, 3, 4...)
+    columnHabits.forEach((habit, index) => {
+        habit.columnIndex = index + 1;
+        updateHabitInStorage(habit);
+    });
+    
+    console.log(`Reordered within ${columnName} column. New indexes assigned.`);
+}
+
+function moveBetweenColumns(draggedHabitId, sourceColumn, targetColumn, newPosition) {
+    const habits = readHabits();
+    const draggedHabit = habits.find(h => h.id == draggedHabitId);
+    
+    // Update the habit's belongs property
+    draggedHabit.belongs = targetColumn;
+    
+    // Get habits in target column
+    const targetColumnHabits = habits.filter(h => h.belongs === targetColumn && h.id != draggedHabitId);
+    
+    // Sort by current columnIndex
+    targetColumnHabits.sort((a, b) => (a.columnIndex || 999) - (b.columnIndex || 999));
+    
+    // Insert dragged habit at new position
+    targetColumnHabits.splice(newPosition, 0, draggedHabit);
+    
+    // Reassign columnIndex values for target column
+    targetColumnHabits.forEach((habit, index) => {
+        habit.columnIndex = index + 1;
+        updateHabitInStorage(habit);
+    });
+    
+    // Reindex source column (fill gaps)
+    const sourceColumnHabits = habits.filter(h => h.belongs === sourceColumn);
+    sourceColumnHabits.sort((a, b) => (a.columnIndex || 999) - (b.columnIndex || 999));
+    sourceColumnHabits.forEach((habit, index) => {
+        habit.columnIndex = index + 1;
+        updateHabitInStorage(habit);
+    });
+    
+    console.log(`Moved "${draggedHabit.title}" from ${sourceColumn} to ${targetColumn} at position ${newPosition + 1}`);
+}
+
+function destroyDragAndDrop() {
+    // Destroy all existing sortable instances
+    Object.values(sortableInstances).forEach(instance => {
+        if (instance) {
+            instance.destroy();
+        }
+    });
+    sortableInstances = {};
+}
+
 // ===== HABIT STATUS FUNCTIONS =====
 function isHabitDueToday(habit) {
     const today = getTodayDate();
@@ -183,10 +368,31 @@ function isHabitCompletedToday(habit) {
 // ===== COLUMN MANAGEMENT FUNCTIONS =====
 
 function clearAllColumns() {
-    document.getElementById('morning-habits').innerHTML = '';
-    document.getElementById('main-habits').innerHTML = '';
-    document.getElementById('evening-habits').innerHTML = '';
-    document.getElementById('wholeday-habits').innerHTML = '';
+    const columnIds = ['morning-habits', 'main-habits', 'evening-habits', 'wholeday-habits'];
+    
+    columnIds.forEach(columnId => {
+        const container = document.getElementById(columnId);
+        if (container) {
+            container.innerHTML = ''; // ✅ Just clear, don't add messages yet
+        }
+    });
+}
+
+function showEmptyState() {
+    clearAllColumns();
+    // Add a message encouraging habit creation
+    const firstColumn = document.getElementById('morning-habits');
+    if (firstColumn) {
+        firstColumn.innerHTML = `
+            <div class="empty-state">
+                <h3>🌟 Start Your Habit Journey!</h3>
+                <p>Create your first habit to begin building better routines.</p>
+                <button onclick="document.getElementById('createHabitButton').click()" class="btn btn-primary" style="margin-top: 12px;">
+                    Create Your First Habit
+                </button>
+            </div>
+        `;
+    }
 }
 
 function showEmptyState() {
@@ -201,43 +407,55 @@ function getColumnContainer(belongs) {
         'morning': 'morning-habits',
         'main': 'main-habits', 
         'evening': 'evening-habits',
-        'whole day': 'wholeday-habits'
+        'whole day': 'wholeday-habits'  // ✅ Make sure this matches
     };
     
-    return document.getElementById(columnMap[belongs] || 'wholeday-habits');
+    const containerId = columnMap[belongs];
+    if (!containerId) {
+        console.warn(`No container found for belongs: "${belongs}". Using whole day as default.`);
+        return document.getElementById('wholeday-habits');
+    }
+    
+    const container = document.getElementById(containerId);
+    if (!container) {
+        console.error(`Container element not found: ${containerId}`);
+        return document.getElementById('wholeday-habits'); // Fallback
+    }
+    
+    return container;
 }
 
 function displayHabitInColumn(habit) {
-    // Get the correct column container
+    // ✅ UPDATED: Use specific column container based on habit.belongs
     const columnContainer = getColumnContainer(habit.belongs);
     
-    // Create the habit element
     const display = document.createElement('div');
     display.setAttribute('data-habit-id', habit.id);
     display.className = 'habit-item';
     
-    // ✅ ADD BACK ALL THE MISSING INFORMATION
-    display.innerHTML = `
-        <div class="habit-title">${habit.title}</div>
-        <div class="habit-info">
-            <strong>Project:</strong> ${habit.projectId}<br>
-            <strong>Frequency:</strong> ${habit.getFrequencyDisplay()}<br>
-            ${habit.counter !== 0 || habit.incrementation !== 0 ? `<strong>Counter:</strong> ${habit.counter} (+${habit.incrementation})<br>` : ''}
-            <strong>Start Date:</strong> ${habit.startDate}<br>
-            <strong>Last Completed:</strong> ${habit.lastCompleted || 'Never'}<br>
-            <strong>Next Due:</strong> ${habit.nextDue}<br>
-            <strong>Current Streak:</strong> ${habit.currentStreak}<br>
-            <strong>Total Completed:</strong> ${habit.totalCompleted}<br>
-            ${habit.notes && habit.notes.trim() !== '' ? `
-                <div class="notes-section">
-                    <span class="notes-label">Notes:</span>
-                    <button class="show-notes-btn" onclick="showNotesModal('${habit.id}', '${habit.title}')">Show</button>
-                </div>
-            ` : ''}
-        </div>
-    `;
+    // ✅ ADD: Show columnIndex in debug (temporary, you can remove later)
+    // In displayHabitInColumn() function, update this line:
+display.innerHTML = `
+    <div class="habit-title">${habit.title}</div>  <!-- ✅ Removed debug number -->
+    <div class="habit-info">
+        <strong>Project:</strong> ${habit.projectId}<br>
+        <strong>Frequency:</strong> ${habit.getFrequencyDisplay()}<br>
+        ${habit.counter !== 0 || habit.incrementation !== 0 ? `<strong>Counter:</strong> ${habit.counter} (+${habit.incrementation})<br>` : ''}
+        <strong>Start Date:</strong> ${habit.startDate}<br>
+        <strong>Last Completed:</strong> ${habit.lastCompleted || 'Never'}<br>
+        <strong>Next Due:</strong> ${habit.nextDue}<br>
+        <strong>Current Streak:</strong> ${habit.currentStreak}<br>
+        <strong>Total Completed:</strong> ${habit.totalCompleted}<br>
+        ${habit.notes && habit.notes.trim() !== '' ? `
+            <div class="notes-section">
+                <span class="notes-label">Notes:</span>
+                <button class="show-notes-btn" onclick="showNotesModal('${habit.id}', '${habit.title}')">Show</button>
+            </div>
+        ` : ''}
+    </div>
+`;
     
-    // Add checkbox and controls (same as before)
+    // Create controls (same as before)
     const isDue = isHabitDueToday(habit);
     const isCompletedToday = isHabitCompletedToday(habit);
     
@@ -262,7 +480,6 @@ function displayHabitInColumn(habit) {
     
     completeCheckbox.onclick = () => markHabitComplete(habit);
 
-    // Add controls to habit
     const controlsDiv = document.createElement('div');
     controlsDiv.className = 'habit-controls';
     controlsDiv.appendChild(completeCheckbox);
@@ -272,7 +489,7 @@ function displayHabitInColumn(habit) {
     
     display.appendChild(controlsDiv);
     
-    // Add to the correct column
+    // ✅ Add to the correct column
     columnContainer.appendChild(display);
 }
 
@@ -643,7 +860,7 @@ function loadHabits() {
     const habits = readHabits();
     const today = getTodayDate();
     
-    // ✅ Clear all columns first
+    // Clear all columns first
     clearAllColumns();
     
     if (habits.length === 0) {
@@ -651,23 +868,63 @@ function loadHabits() {
         return;
     }
     
-    habits.forEach(habit => {
-        const oldNextDue = habit.nextDue;
-        habit.nextDue = recalculateNextDueFromStart(habit, today);
+    // ✅ FIX: Track which columns actually get habits
+    const columnsWithHabits = new Set();
+    
+    // Process each column separately and sort by columnIndex
+    const columns = ['morning', 'main', 'evening', 'whole day'];
+    
+    columns.forEach(columnName => {
+        // Get habits for this column
+        let columnHabits = habits.filter(habit => habit.belongs === columnName);
         
-        const updatedHabit = autoUpdateStreakIfBroken(habit);
+        // Update their nextDue and streaks
+        columnHabits = columnHabits.map(habit => {
+            const oldNextDue = habit.nextDue;
+            habit.nextDue = recalculateNextDueFromStart(habit, today);
+            
+            const updatedHabit = autoUpdateStreakIfBroken(habit);
+            
+            // Save if changed
+            if (oldNextDue !== habit.nextDue || updatedHabit !== habit) {
+                updateHabitInStorage(updatedHabit);
+            }
+            
+            return updatedHabit;
+        });
         
-        if (oldNextDue !== habit.nextDue || updatedHabit !== habit) {
-            updateHabitInStorage(updatedHabit);
-        }
+        // Apply smart scheduling filter
+        const filteredHabits = columnHabits.filter(habit => {
+            return showAllHabits || isHabitDueToday(habit) || isHabitCompletedToday(habit);
+        });
         
-        // ✅ NEW: Apply smart scheduling filter + sort into columns
-        if (showAllHabits || isHabitDueToday(updatedHabit) || isHabitCompletedToday(updatedHabit)) {
-            displayHabitInColumn(updatedHabit);
+        // Sort by columnIndex
+        const sortedHabits = filteredHabits.sort((a, b) => {
+            const indexA = a.columnIndex || 999;
+            const indexB = b.columnIndex || 999;
+            return indexA - indexB;
+        });
+        
+        // ✅ FIX: Only clear and show empty if no habits will be displayed
+        const columnContainer = getColumnContainer(columnName);
+        if (sortedHabits.length === 0) {
+            // Show appropriate empty message
+            showEmptyColumnMessage(columnContainer, columnName);
+        } else {
+            // Clear the column and display habits
+            columnContainer.innerHTML = '';
+            sortedHabits.forEach(habit => {
+                displayHabitInColumn(habit);
+            });
+            columnsWithHabits.add(columnName);
         }
     });
+    
+    // ✅ Initialize drag & drop after loading habits
+    setTimeout(() => {
+        initializeDragAndDrop();
+    }, 100);
 }
-
 // ===== EDIT MODAL FUNCTIONS =====
 function preSelectCustomDays(customdays) {
     if (!customdays) return;
@@ -742,7 +999,7 @@ function saveEditedHabit(originalHabit) {
     let newIncrementation = 0;
     
     if (document.getElementById('editCounterCheckbox').checked) {
-        newCounter = parseInt(document.getElementById('editCounter').value) || 0; 
+        newCounter = parseInt(document.getElementById('editCounter').value) || 0;
         newIncrementation = parseInt(document.getElementById('editIncrementation').value) || 1;
     }
     
@@ -750,23 +1007,35 @@ function saveEditedHabit(originalHabit) {
     if (document.getElementById('editNoteCheckbox').checked) {
         newNotes = document.getElementById('editNote').value || '';
     }
-
+    
+    // ✅ NEW: Handle column change
+    let newColumnIndex = originalHabit.columnIndex;
+    if (newBelongs !== originalHabit.belongs) {
+        // Habit changed columns - put at bottom of new column
+        const allHabits = readHabits();
+        const sameColumnHabits = allHabits.filter(h => h.belongs === newBelongs);
+        const maxIndex = sameColumnHabits.length > 0 
+            ? Math.max(...sameColumnHabits.map(h => h.columnIndex || 0))
+            : 0;
+        newColumnIndex = maxIndex + 1;
+    }
+    
     const updatedHabit = {
         ...originalHabit,
         title: newTitle,
         projectId: newProject,
-        color: newColor, // ✅ ADD THIS LINE
-        belongs: newBelongs, 
+        color: newColor,
+        belongs: newBelongs,
         frequencyType: newFreq,
         intervalday: newIntervalday,
         customdays: newCustomdays,
         counter: newCounter,
         incrementation: newIncrementation,
         startDate: newStartDate,
-        notes: newNotes
+        notes: newNotes,
+        columnIndex: newColumnIndex  // ✅ NEW: Include columnIndex
     };
     
-    // Recalculate nextDue when editing
     const today = getTodayDate();
     updatedHabit.nextDue = recalculateNextDueFromStart(updatedHabit, today);
     
@@ -1003,6 +1272,8 @@ function createHabitFromModal() {
         note = document.getElementById('modalNoteValue').value || '';
     }
 
+    console.log('Creating habit with belongs:', selectedBelongs); // Debug log
+
     try {
         createHabit(
             Date.now(),
@@ -1016,7 +1287,7 @@ function createHabitFromModal() {
             startDate,
             note,
             selectedColor,
-            selectedBelongs
+            selectedBelongs  // ✅ Make sure this is passed
         );
         
         closeCreateModal();
@@ -1192,15 +1463,152 @@ showFormButton.addEventListener('click', function () {
     openCreateModal(); // ✅ Simply call the modal function
 });
 // ===== TOGGLE VIEW EVENT LISTENER =====
+// ===== UPDATE TOGGLE VIEW EVENT LISTENER =====
 toggleViewButton.addEventListener('click', function() {
-    showAllHabits = !showAllHabits; // Flip the state
+    showAllHabits = !showAllHabits;
     
-    // Update button text
-    toggleViewButton.textContent = showAllHabits ? 'Show Today Only' : 'Show All Habits';
+    if (showAllHabits) {
+        // ✅ ORGANIZE MODE
+        toggleViewButton.textContent = '🎯 Today Focus';
+        toggleViewButton.className = 'btn btn-primary';
+        document.body.classList.remove('smart-view');
+        document.body.classList.add('organize-view');
+        console.log('Switched to ORGANIZE mode - drag & drop will be enabled');
+    } else {
+        // ✅ SMART MODE
+        toggleViewButton.textContent = '📝 Organize Habits';
+        toggleViewButton.className = 'btn btn-secondary';
+        document.body.classList.remove('organize-view');
+        document.body.classList.add('smart-view');
+        
+        // ✅ FIX: Destroy drag & drop when switching to smart mode
+        destroyDragAndDrop();
+        console.log('Switched to SMART mode - drag & drop disabled');
+    }
     
-    // Reload habits with new filter
-    loadHabits();
+    loadHabits(); // This will call initializeDragAndDrop() only if showAllHabits = true
 });
+
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown', function(event) {
+    // Ctrl/Cmd + N = Create new habit
+    if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
+        event.preventDefault();
+        document.getElementById('createHabitButton').click();
+    }
+    
+    // Ctrl/Cmd + O = Toggle organization mode
+    if ((event.ctrlKey || event.metaKey) && event.key === 'o') {
+        event.preventDefault();
+        document.getElementById('toggleViewButton').click();
+    }
+    
+    // Escape = Close any open modal
+    if (event.key === 'Escape') {
+        closeCreateModal();
+        closeEditModal();
+        closeNotesModal();
+    }
+});
+
+// ===== ENHANCED BUTTON FEEDBACK =====
+function addButtonFeedback() {
+    const buttons = document.querySelectorAll('.btn');
+    buttons.forEach(button => {
+        button.addEventListener('click', function() {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+}
+
+// ===== INITIALIZE APP STATE =====
+document.addEventListener('DOMContentLoaded', function() {
+    // Set initial mode
+    if (showAllHabits) {
+        document.body.classList.add('organize-view');
+        toggleViewButton.textContent = '🎯 Today Focus';
+        toggleViewButton.className = 'btn btn-primary';
+    } else {
+        document.body.classList.add('smart-view');
+        toggleViewButton.textContent = '📝 Organize Habits';
+        toggleViewButton.className = 'btn btn-secondary';
+    }
+    
+    // Load habits
+    loadHabits();
+    
+    // Add button feedback
+    addButtonFeedback();
+    
+    console.log('🚀 Habit Tracker initialized successfully!');
+});
+
+// Call after DOM loads
+document.addEventListener('DOMContentLoaded', addButtonFeedback);
+
+
+// ===== SUCCESS FEEDBACK SYSTEM =====
+function showSuccessMessage(message, duration = 3000) {
+    // Remove existing success message
+    const existing = document.getElementById('successMessage');
+    if (existing) existing.remove();
+    
+    // Create success message
+    const successDiv = document.createElement('div');
+    successDiv.id = 'successMessage';
+    successDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--success-color);
+        color: white;
+        padding: 12px 20px;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        z-index: 2000;
+        font-weight: 600;
+        animation: slideInRight 0.3s ease;
+    `;
+    successDiv.textContent = message;
+    
+    document.body.appendChild(successDiv);
+    
+    // Remove after duration
+    setTimeout(() => {
+        if (successDiv.parentNode) {
+            successDiv.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => successDiv.remove(), 300);
+        }
+    }, duration);
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideInRight {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @keyframes slideOutRight {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// Update your success points to show feedback
+// In createHabitFromModal():
+// showSuccessMessage('✅ Habit created successfully!');
+
+// In handleHabitReorder():
+// showSuccessMessage('✅ Habits reordered!');
+
+// In markHabitComplete():
+// showSuccessMessage('✅ Habit completed!');
 
 
 
