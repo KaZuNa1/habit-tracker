@@ -1,18 +1,15 @@
-// ===== IMPORTS =====
+// IMPORTS
 const { createHabit } = require('./logic/habitManager');
 const { readHabits, removeHabit, writeHabits } = require('./logic/storage');
 const { calculateNextDue, calculateNextDueAfterCompletion, checkIfCustomWeekdaysStreakBroken, recalculateNextDueFromStart, calculateIntervalPatternNextDue } = require('./logic/dateUtils');
 
-// ===== DOM ELEMENTS =====
+// DOM ELEMENTS
 const showFormButton = document.getElementById('createHabitButton');
 const toggleViewButton = document.getElementById('toggleViewButton');
-
-
 const displayArea = document.getElementById('habitDisplayArea');
 
-
-// ===== TOGGLE STATE =====
-let showAllHabits = false; // ✅ ADD THIS VARIABLE
+// TOGGLE STATE
+let showAllHabits = false;
 
 // Form sections
 const dailySection = document.getElementById('daily_sec');
@@ -21,7 +18,7 @@ const customSection = document.getElementById('custom_weekdays_section');
 const counterSection = document.getElementById('counter_section');
 const noteSection = document.getElementById('note_section');
 
-// ===== CONSTANTS =====
+// CONSTANTS
 const WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 const COLORS = {
     SUCCESS: '#28a745',
@@ -30,37 +27,34 @@ const COLORS = {
 };
 
 const HABIT_COLORS = {
-    default: '#6c757d',  // Gray
-    violet: '#8e44ad',   // Violet
-    red: '#e74c3c',      // Red
-    green: '#27ae60',    // Green
-    blue: '#3498db',     // Blue
-    orange: '#f39c12',   // Orange
-    pink: '#e91e63',     // Pink
-    cyan: '#17a2b8',     // Cyan
-    yellow: '#f1c40f',   // Yellow
-    purple: '#9b59b6'    // Purple
+    default: '#6c757d',
+    violet: '#8e44ad',
+    red: '#e74c3c',
+    green: '#27ae60',
+    blue: '#3498db',
+    orange: '#f39c12',
+    pink: '#e91e63',
+    cyan: '#17a2b8',
+    yellow: '#f1c40f',
+    purple: '#9b59b6'
 };
 
-// ===== UTILITY FUNCTIONS =====
+// UTILITY FUNCTIONS
 function getTodayDate() {
     return new Date().toISOString().split('T')[0];
 }
 
-// ===== COLUMN HELPER FUNCTIONS =====
-
+// COLUMN HELPER FUNCTIONS
 function getHabitsForColumn(columnName, applyDateFilter = true) {
     const allHabits = readHabits();
     let columnHabits = allHabits.filter(habit => habit.belongs === columnName);
     
-    // Apply smart scheduling filter if requested
     if (applyDateFilter && !showAllHabits) {
         columnHabits = columnHabits.filter(habit => {
             return isHabitDueToday(habit) || isHabitCompletedToday(habit);
         });
     }
     
-    // ✅ Always sort by columnIndex
     return columnHabits.sort((a, b) => {
         const indexA = a.columnIndex || 999;
         const indexB = b.columnIndex || 999;
@@ -79,7 +73,6 @@ function showEmptyColumnMessage(container, columnName) {
     const config = columnConfig[columnName] || { name: 'Unknown', icon: '❓' };
     
     if (showAllHabits) {
-        // Show All mode - encourage organization
         container.innerHTML = `
             <div class="empty-column-message">
                 <p>${config.icon}</p>
@@ -88,7 +81,6 @@ function showEmptyColumnMessage(container, columnName) {
             </div>
         `;
     } else {
-        // Smart mode - focus message
         container.innerHTML = `
             <div class="empty-column-message">
                 <p>${config.icon}</p>
@@ -126,19 +118,15 @@ function getSelectedWeekdays() {
     return selected.join(',');
 }
 
-// ===== NOTES MODAL FUNCTIONS =====
-
+// NOTES MODAL FUNCTIONS
 function showNotesModal(habitId, habitTitle) {
-    // Get the habit data
     const habits = readHabits();
     const habit = habits.find(h => h.id == habitId);
     
     if (!habit || !habit.notes) {
-        console.warn('No notes found for habit');
         return;
     }
     
-    // Create modal
     const modal = document.createElement('div');
     modal.id = 'notesModal';
     modal.className = 'notes-modal';
@@ -155,14 +143,12 @@ function showNotesModal(habitId, habitTitle) {
     
     document.body.appendChild(modal);
     
-    // Close on outside click
     modal.onclick = (e) => {
         if (e.target === modal) {
             closeNotesModal();
         }
     };
     
-    // Close on Escape key
     document.addEventListener('keydown', function escapeHandler(e) {
         if (e.key === 'Escape') {
             closeNotesModal();
@@ -189,7 +175,7 @@ function getSelectedEditWeekdays() {
     return selected.join(',');
 }
 
-// ===== STORAGE FUNCTIONS =====
+// STORAGE FUNCTIONS
 function updateHabitInStorage(updatedHabit) {
     const allHabits = readHabits();
     const updatedHabits = allHabits.map(habit => 
@@ -198,22 +184,16 @@ function updateHabitInStorage(updatedHabit) {
     writeHabits(updatedHabits);
 }
 
-// ===== DRAG & DROP FUNCTIONALITY =====
-let sortableInstances = {}; // Store sortable instances for each column
+// DRAG & DROP FUNCTIONALITY
+let sortableInstances = {};
 
 function initializeDragAndDrop() {
-    // Only enable drag & drop in "Show All" mode
     if (!showAllHabits) {
-        console.log('Drag & drop disabled in Smart View mode');
         return;
     }
     
-    console.log('Initializing drag & drop for organization mode');
-    
-    // Destroy existing instances
     destroyDragAndDrop();
     
-    // Initialize drag & drop for each column
     const columns = ['morning', 'main', 'evening', 'wholeday'];
     
     columns.forEach(columnName => {
@@ -221,21 +201,16 @@ function initializeDragAndDrop() {
         
         if (columnContainer) {
             sortableInstances[columnName] = Sortable.create(columnContainer, {
-                group: 'habits', // Allow dragging between columns
+                group: 'habits',
                 animation: 200,
                 ghostClass: 'sortable-ghost',
                 chosenClass: 'sortable-chosen',
                 dragClass: 'sortable-drag',
-                
-                // Only allow dragging habit items
                 draggable: '.habit-item',
                 
-                // Handle drag end
                 onEnd: function(evt) {
                     const sourceColumn = evt.from.id.replace('-habits', '');
                     const targetColumn = evt.to.id.replace('-habits', '');
-                    
-                    console.log(`Habit moved from ${sourceColumn} to ${targetColumn} (${evt.oldIndex} → ${evt.newIndex})`);
                     
                     handleHabitReorder(sourceColumn, targetColumn, evt.oldIndex, evt.newIndex, evt.item);
                 }
@@ -250,17 +225,12 @@ function handleHabitReorder(sourceColumn, targetColumn, oldIndex, newIndex, drag
     const draggedHabit = habits.find(h => h.id == habitId);
     
     if (!draggedHabit) {
-        console.error('Dragged habit not found!');
         return;
     }
     
-    console.log(`Reordering: "${draggedHabit.title}" from ${sourceColumn} to ${targetColumn}`);
-    
     if (sourceColumn === targetColumn) {
-        // ✅ SAME COLUMN: Just reorder within column
         reorderWithinColumn(sourceColumn, draggedHabit.id, newIndex);
     } else {
-        // ✅ DIFFERENT COLUMN: Move between columns
         moveBetweenColumns(draggedHabit.id, sourceColumn, targetColumn, newIndex);
     }
 }
@@ -269,60 +239,45 @@ function reorderWithinColumn(columnName, draggedHabitId, newPosition) {
     const habits = readHabits();
     const columnHabits = habits.filter(h => h.belongs === columnName);
     
-    // Sort by current columnIndex
     columnHabits.sort((a, b) => (a.columnIndex || 999) - (b.columnIndex || 999));
     
-    // Find the dragged habit and remove it
     const draggedHabitIndex = columnHabits.findIndex(h => h.id == draggedHabitId);
     const draggedHabit = columnHabits.splice(draggedHabitIndex, 1)[0];
     
-    // Insert at new position
     columnHabits.splice(newPosition, 0, draggedHabit);
     
-    // Reassign columnIndex values (1, 2, 3, 4...)
     columnHabits.forEach((habit, index) => {
         habit.columnIndex = index + 1;
         updateHabitInStorage(habit);
     });
-    
-    console.log(`Reordered within ${columnName} column. New indexes assigned.`);
 }
 
 function moveBetweenColumns(draggedHabitId, sourceColumn, targetColumn, newPosition) {
     const habits = readHabits();
     const draggedHabit = habits.find(h => h.id == draggedHabitId);
     
-    // Update the habit's belongs property
     draggedHabit.belongs = targetColumn;
     
-    // Get habits in target column
     const targetColumnHabits = habits.filter(h => h.belongs === targetColumn && h.id != draggedHabitId);
     
-    // Sort by current columnIndex
     targetColumnHabits.sort((a, b) => (a.columnIndex || 999) - (b.columnIndex || 999));
     
-    // Insert dragged habit at new position
     targetColumnHabits.splice(newPosition, 0, draggedHabit);
     
-    // Reassign columnIndex values for target column
     targetColumnHabits.forEach((habit, index) => {
         habit.columnIndex = index + 1;
         updateHabitInStorage(habit);
     });
     
-    // Reindex source column (fill gaps)
     const sourceColumnHabits = habits.filter(h => h.belongs === sourceColumn);
     sourceColumnHabits.sort((a, b) => (a.columnIndex || 999) - (b.columnIndex || 999));
     sourceColumnHabits.forEach((habit, index) => {
         habit.columnIndex = index + 1;
         updateHabitInStorage(habit);
     });
-    
-    console.log(`Moved "${draggedHabit.title}" from ${sourceColumn} to ${targetColumn} at position ${newPosition + 1}`);
 }
 
 function destroyDragAndDrop() {
-    // Destroy all existing sortable instances
     Object.values(sortableInstances).forEach(instance => {
         if (instance) {
             instance.destroy();
@@ -331,11 +286,10 @@ function destroyDragAndDrop() {
     sortableInstances = {};
 }
 
-// ===== HABIT STATUS FUNCTIONS =====
+// HABIT STATUS FUNCTIONS
 function isHabitDueToday(habit) {
     const today = getTodayDate();
     
-    // Check if habit has started yet
     if (today < habit.startDate) {
         return false;
     }
@@ -344,7 +298,6 @@ function isHabitDueToday(habit) {
         return true;
     }
     
-    // For custom weekdays, check if today is a valid day
     if (habit.frequencyType === 'custom_weekdays') {
         const todayDate = new Date(today);
         const todayDayName = todayDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
@@ -365,41 +318,36 @@ function isHabitCompletedToday(habit) {
     const lastCompletion = habit.completionHistory[habit.completionHistory.length - 1];
     return lastCompletion === today;
 }
-// ===== COLUMN MANAGEMENT FUNCTIONS =====
 
+// COLUMN MANAGEMENT FUNCTIONS
 function clearAllColumns() {
     const columnIds = ['morning-habits', 'main-habits', 'evening-habits', 'wholeday-habits'];
     
     columnIds.forEach(columnId => {
         const container = document.getElementById(columnId);
         if (container) {
-            container.innerHTML = ''; // ✅ Just clear, don't add messages yet
+            container.innerHTML = '';
         }
     });
 }
 
-function showEmptyState() {
-    clearAllColumns();
-    // Add a message encouraging habit creation
-    const firstColumn = document.getElementById('morning-habits');
-    if (firstColumn) {
-        firstColumn.innerHTML = `
-            <div class="empty-state">
-                <h3>🌟 Start Your Habit Journey!</h3>
-                <p>Create your first habit to begin building better routines.</p>
-                <button onclick="document.getElementById('createHabitButton').click()" class="btn btn-primary" style="margin-top: 12px;">
-                    Create Your First Habit
-                </button>
-            </div>
-        `;
-    }
-}
-
-function showEmptyState() {
-    const columns = ['morning-habits', 'main-habits', 'evening-habits', 'wholeday-habits'];
-    columns.forEach(columnId => {
-        document.getElementById(columnId).innerHTML = '<p class="empty-message">No habits yet</p>';
+function fixInvalidBelongs() {
+    const habits = readHabits();
+    const validColumns = ['morning', 'main', 'evening', 'whole day'];
+    let fixedCount = 0;
+    
+    habits.forEach(habit => {
+        if (!validColumns.includes(habit.belongs)) {
+            habit.belongs = 'whole day';
+            habit.columnIndex = 999;
+            updateHabitInStorage(habit);
+            fixedCount++;
+        }
     });
+    
+    if (fixedCount > 0) {
+        loadHabits();
+    }
 }
 
 function getColumnContainer(belongs) {
@@ -407,55 +355,49 @@ function getColumnContainer(belongs) {
         'morning': 'morning-habits',
         'main': 'main-habits', 
         'evening': 'evening-habits',
-        'whole day': 'wholeday-habits'  // ✅ Make sure this matches
+        'whole day': 'wholeday-habits'
     };
     
     const containerId = columnMap[belongs];
     if (!containerId) {
-        console.warn(`No container found for belongs: "${belongs}". Using whole day as default.`);
         return document.getElementById('wholeday-habits');
     }
     
     const container = document.getElementById(containerId);
     if (!container) {
-        console.error(`Container element not found: ${containerId}`);
-        return document.getElementById('wholeday-habits'); // Fallback
+        return document.getElementById('wholeday-habits');
     }
     
     return container;
 }
 
 function displayHabitInColumn(habit) {
-    // ✅ UPDATED: Use specific column container based on habit.belongs
     const columnContainer = getColumnContainer(habit.belongs);
     
     const display = document.createElement('div');
     display.setAttribute('data-habit-id', habit.id);
     display.className = 'habit-item';
     
-    // ✅ ADD: Show columnIndex in debug (temporary, you can remove later)
-    // In displayHabitInColumn() function, update this line:
-display.innerHTML = `
-    <div class="habit-title">${habit.title}</div>  <!-- ✅ Removed debug number -->
-    <div class="habit-info">
-        <strong>Project:</strong> ${habit.projectId}<br>
-        <strong>Frequency:</strong> ${habit.getFrequencyDisplay()}<br>
-        ${habit.counter !== 0 || habit.incrementation !== 0 ? `<strong>Counter:</strong> ${habit.counter} (+${habit.incrementation})<br>` : ''}
-        <strong>Start Date:</strong> ${habit.startDate}<br>
-        <strong>Last Completed:</strong> ${habit.lastCompleted || 'Never'}<br>
-        <strong>Next Due:</strong> ${habit.nextDue}<br>
-        <strong>Current Streak:</strong> ${habit.currentStreak}<br>
-        <strong>Total Completed:</strong> ${habit.totalCompleted}<br>
-        ${habit.notes && habit.notes.trim() !== '' ? `
-            <div class="notes-section">
-                <span class="notes-label">Notes:</span>
-                <button class="show-notes-btn" onclick="showNotesModal('${habit.id}', '${habit.title}')">Show</button>
-            </div>
-        ` : ''}
-    </div>
-`;
+    display.innerHTML = `
+        <div class="habit-title">${habit.title}</div>
+        <div class="habit-info">
+            <strong>Project:</strong> ${habit.projectId}<br>
+            <strong>Frequency:</strong> ${habit.getFrequencyDisplay()}<br>
+            ${habit.counter !== 0 || habit.incrementation !== 0 ? `<strong>Counter:</strong> ${habit.counter} (+${habit.incrementation})<br>` : ''}
+            <strong>Start Date:</strong> ${habit.startDate}<br>
+            <strong>Last Completed:</strong> ${habit.lastCompleted || 'Never'}<br>
+            <strong>Next Due:</strong> ${habit.nextDue}<br>
+            <strong>Current Streak:</strong> ${habit.currentStreak}<br>
+            <strong>Total Completed:</strong> ${habit.totalCompleted}<br>
+            ${habit.notes && habit.notes.trim() !== '' ? `
+                <div class="notes-section">
+                    <span class="notes-label">Notes:</span>
+                    <button class="show-notes-btn" onclick="showNotesModal('${habit.id}', '${habit.title}')">Show</button>
+                </div>
+            ` : ''}
+        </div>
+    `;
     
-    // Create controls (same as before)
     const isDue = isHabitDueToday(habit);
     const isCompletedToday = isHabitCompletedToday(habit);
     
@@ -488,21 +430,19 @@ display.innerHTML = `
     controlsDiv.appendChild(deleteBtn);
     
     display.appendChild(controlsDiv);
-    
-    // ✅ Add to the correct column
     columnContainer.appendChild(display);
 }
 
-// ===== STREAK CALCULATION =====
+// STREAK CALCULATION
 function calculateStreak(completionHistory, todayDate, lastDueDate, frequencyType = 'daily', intervalday = 1, customdays = '') {
     if (completionHistory.length === 0) {
-        return 1; // First completion
+        return 1;
     }
     
     const allCompletions = [...completionHistory, todayDate];
     allCompletions.sort();
     
-    let streak = 1; // Today counts as 1
+    let streak = 1;
     
     for (let i = allCompletions.length - 2; i >= 0; i--) {
         const currentDate = new Date(allCompletions[i + 1]);
@@ -514,7 +454,7 @@ function calculateStreak(completionHistory, todayDate, lastDueDate, frequencyTyp
         if (frequencyType === 'interval') {
             expectedGap = parseInt(intervalday);
         } else if (frequencyType === 'custom_weekdays') {
-            expectedGap = 1; // Simplified for now
+            expectedGap = 1;
         }
         
         if (daysDifference <= expectedGap + 1) {
@@ -549,7 +489,6 @@ function autoUpdateStreakIfBroken(habit) {
     if (habit.frequencyType === 'daily') {
         streakBroken = daysSinceLastCompletion > 1;
     } else if (habit.frequencyType === 'interval') {
-        // ✅ UPDATED: Check if we missed the scheduled due date
         const scheduledNextDue = calculateIntervalPatternNextDue(habit, lastCompletion);
         streakBroken = today > scheduledNextDue;
     } else if (habit.frequencyType === 'custom_weekdays') {
@@ -557,31 +496,25 @@ function autoUpdateStreakIfBroken(habit) {
     }
     
     if (streakBroken) {
-        console.log(`Streak broken for ${habit.title}! Resetting to 0. Days gap: ${daysSinceLastCompletion}`);
         habit.currentStreak = 0;
         
         if (habit.frequencyType === 'custom_weekdays') {
             const newNextDue = calculateNextDue(habit.frequencyType, habit.intervalday, habit.customdays, today);
             habit.nextDue = newNextDue;
         }
-        // ✅ For intervals, nextDue will be recalculated by the pattern function
     }
     
     return habit;
 }
 
-// ===== HABIT PROGRESS FUNCTIONS =====
+// HABIT PROGRESS FUNCTIONS
 function updateHabitProgress(habit) {
     const today = getTodayDate();
     
-    // Update counter
     const newCounter = parseInt(habit.counter) + parseInt(habit.incrementation);
-    
-    // Update completion tracking  
     const newTotalCompleted = habit.totalCompleted + 1;
     const newCompletionHistory = [...habit.completionHistory, today];
     
-    // Calculate streak
     let newStreak;
     if (habit.currentStreak === 0) {
         newStreak = 1;
@@ -596,10 +529,8 @@ function updateHabitProgress(habit) {
         );
     }
     
-    // Calculate next due date (AFTER completion)
     const newNextDue = calculateNextDueAfterCompletion(habit.frequencyType, habit.intervalday, habit.customdays, today);
     
-    // Create updated habit
     const updatedHabit = {
         ...habit,
         counter: newCounter,
@@ -611,25 +542,16 @@ function updateHabitProgress(habit) {
         isActiveToday: false
     };
     
-    // Save to storage
     updateHabitInStorage(updatedHabit);
-    
-    console.log(`Habit completed! Counter: ${habit.counter} → ${newCounter}, Streak: ${habit.currentStreak} → ${newStreak}`);
 }
 
 function undoHabitCompletion(habit) {
     const today = getTodayDate();
     
-    // Remove today from completion history
     const updatedHistory = habit.completionHistory.filter(date => date !== today);
-    
-    // Revert counter
     const revertedCounter = habit.counter - habit.incrementation;
-    
-    // Decrease total completed
     const revertedTotal = Math.max(0, habit.totalCompleted - 1);
     
-    // Calculate reverted streak
     let revertedStreak;
     
     if (habit.currentStreak === 1 && updatedHistory.length > 0) {
@@ -663,11 +585,9 @@ function undoHabitCompletion(habit) {
     };
     
     updateHabitInStorage(revertedHabit);
-    
-    console.log(`Habit undone! Counter: ${habit.counter} → ${revertedCounter}, Streak: ${habit.currentStreak} → ${revertedStreak}`);
 }
 
-// ===== DISPLAY FUNCTIONS =====
+// DISPLAY FUNCTIONS
 function createCheckboxLabel(habit, isDue, isCompletedToday) {
     const checkboxLabel = document.createElement('label');
     checkboxLabel.htmlFor = `complete-${habit.id}`;
@@ -693,12 +613,10 @@ function updateSingleHabitDisplay(updatedHabit) {
     const existingDisplay = document.querySelector(`[data-habit-id="${updatedHabit.id}"]`);
     
     if (!existingDisplay) {
-        console.warn(`Could not find display element for habit ${updatedHabit.id}`);
         loadHabits();
         return;
     }
     
-    // Update the habit info (title and details)
     const titleElement = existingDisplay.querySelector('.habit-title');
     const infoElement = existingDisplay.querySelector('.habit-info');
     
@@ -707,31 +625,28 @@ function updateSingleHabitDisplay(updatedHabit) {
     }
     
     if (infoElement) {
-    infoElement.innerHTML = `
-        <strong>Project:</strong> ${updatedHabit.projectId}<br>
-        <strong>Frequency:</strong> ${updatedHabit.getFrequencyDisplay()}<br>
-        ${updatedHabit.counter !== 0 || updatedHabit.incrementation !== 0 ? `<strong>Counter:</strong> ${updatedHabit.counter} (+${updatedHabit.incrementation})<br>` : ''}
-        <strong>Start Date:</strong> ${updatedHabit.startDate}<br>
-        <strong>Last Completed:</strong> ${updatedHabit.lastCompleted || 'Never'}<br>
-        <strong>Next Due:</strong> ${updatedHabit.nextDue}<br>
-        <strong>Current Streak:</strong> ${updatedHabit.currentStreak}<br>
-        <strong>Total Completed:</strong> ${updatedHabit.totalCompleted}<br>
-        ${updatedHabit.notes && updatedHabit.notes.trim() !== '' ? `
-            <div class="notes-section">
-                <span class="notes-label">Notes:</span>
-                <button class="show-notes-btn" onclick="showNotesModal('${updatedHabit.id}', '${updatedHabit.title}')">Show</button>
-            </div>
-        ` : ''}
-    `;
-}
+        infoElement.innerHTML = `
+            <strong>Project:</strong> ${updatedHabit.projectId}<br>
+            <strong>Frequency:</strong> ${updatedHabit.getFrequencyDisplay()}<br>
+            ${updatedHabit.counter !== 0 || updatedHabit.incrementation !== 0 ? `<strong>Counter:</strong> ${updatedHabit.counter} (+${updatedHabit.incrementation})<br>` : ''}
+            <strong>Start Date:</strong> ${updatedHabit.startDate}<br>
+            <strong>Last Completed:</strong> ${updatedHabit.lastCompleted || 'Never'}<br>
+            <strong>Next Due:</strong> ${updatedHabit.nextDue}<br>
+            <strong>Current Streak:</strong> ${updatedHabit.currentStreak}<br>
+            <strong>Total Completed:</strong> ${updatedHabit.totalCompleted}<br>
+            ${updatedHabit.notes && updatedHabit.notes.trim() !== '' ? `
+                <div class="notes-section">
+                    <span class="notes-label">Notes:</span>
+                    <button class="show-notes-btn" onclick="showNotesModal('${updatedHabit.id}', '${updatedHabit.title}')">Show</button>
+                </div>
+            ` : ''}
+        `;
+    }
     
-    // ✅ SIMPLE FIX: Rebuild the entire controls section
     const controlsDiv = existingDisplay.querySelector('.habit-controls');
     if (controlsDiv) {
-        // Clear old controls
         controlsDiv.innerHTML = '';
         
-        // Recreate controls with updated state
         const isDue = isHabitDueToday(updatedHabit);
         const isCompletedToday = isHabitCompletedToday(updatedHabit);
         
@@ -756,57 +671,11 @@ function updateSingleHabitDisplay(updatedHabit) {
         
         completeCheckbox.onclick = () => markHabitComplete(updatedHabit);
 
-        // Add all controls back
         controlsDiv.appendChild(completeCheckbox);
         controlsDiv.appendChild(checkboxLabel);
         controlsDiv.appendChild(editBtn);
         controlsDiv.appendChild(deleteBtn);
     }
-    
-    console.log('Successfully updated habit display in place');
-}
-
-function displayHabit(habit) {
-
-
-    const display = document.createElement('p');
-    display.setAttribute('data-habit-id', habit.id);
-    display.innerHTML = habit.info();
-
-    const completeCheckbox = document.createElement('input');
-    completeCheckbox.type = 'checkbox';
-    completeCheckbox.id = `complete-${habit.id}`;
-    
-    const isDue = isHabitDueToday(habit);
-    const isCompletedToday = isHabitCompletedToday(habit);
-
-    completeCheckbox.checked = isCompletedToday;
-    
-    const shouldShowCheckbox = isDue || isCompletedToday;
-    completeCheckbox.disabled = !shouldShowCheckbox;
-    completeCheckbox.style.display = shouldShowCheckbox ? 'inline' : 'none';
-    
-    // Create label
-    const checkboxLabel = createCheckboxLabel(habit, isDue, isCompletedToday);
-    
-    // Create buttons
-    const editBtn = document.createElement('button');
-    editBtn.textContent = 'Edit';
-    editBtn.onclick = () => openEditModal(habit);
-
-    const deleteBtn = document.createElement('button');
-    deleteBtn.textContent = 'Delete';
-    deleteBtn.onclick = () => deleteHabitOptimized(habit);
-    
-    // Add event listener
-    completeCheckbox.onclick = () => markHabitComplete(habit);
-
-    // Append elements
-    display.appendChild(completeCheckbox);
-    display.appendChild(checkboxLabel);
-    display.appendChild(editBtn);
-    display.appendChild(deleteBtn);
-    displayArea.appendChild(display);
 }
 
 function markHabitComplete(habit) {
@@ -814,28 +683,22 @@ function markHabitComplete(habit) {
     const isCompletedToday = isHabitCompletedToday(habit);
     const isDue = isHabitDueToday(habit);
     
-    
     if (!isDue && !isCompletedToday) {
         checkbox.checked = isCompletedToday;
         return;
     }
     
     if (!isCompletedToday && checkbox.checked) {
-        // User wants to complete habit
         updateHabitProgress(habit);
         const allHabits = readHabits();
         const updatedHabit = allHabits.find(h => h.id === habit.id);
         updateSingleHabitDisplay(updatedHabit);
-        
     } else if (isCompletedToday && !checkbox.checked) {
-        // User wants to undo completion
         undoHabitCompletion(habit);
         const allHabits = readHabits();
         const updatedHabit = allHabits.find(h => h.id === habit.id);
         updateSingleHabitDisplay(updatedHabit);
-        
     } else {
-        // Sync checkbox with actual state
         checkbox.checked = isCompletedToday;
     }
 }
@@ -843,13 +706,11 @@ function markHabitComplete(habit) {
 function deleteHabitOptimized(habitToDelete) {
     removeHabit(habitToDelete);
     
-    // Remove only this habit's display element
     const habitElement = document.querySelector(`[data-habit-id="${habitToDelete.id}"]`);
     if (habitElement) {
         habitElement.remove();
     }
     
-    // Check if any habits remain
     const remainingHabits = readHabits();
     if (remainingHabits.length === 0) {
         displayArea.innerHTML = '<p>No habits yet!</p>';
@@ -860,32 +721,35 @@ function loadHabits() {
     const habits = readHabits();
     const today = getTodayDate();
     
-    // Clear all columns first
     clearAllColumns();
     
     if (habits.length === 0) {
-        showEmptyState();
+        const firstColumn = document.getElementById('morning-habits');
+        if (firstColumn) {
+            firstColumn.innerHTML = `
+                <div class="empty-state">
+                    <h3>🌟 Start Your Habit Journey!</h3>
+                    <p>Create your first habit to begin building better routines.</p>
+                    <button onclick="document.getElementById('createHabitButton').click()" class="btn btn-primary" style="margin-top: 12px;">
+                        Create Your First Habit
+                    </button>
+                </div>
+            `;
+        }
         return;
     }
     
-    // ✅ FIX: Track which columns actually get habits
-    const columnsWithHabits = new Set();
-    
-    // Process each column separately and sort by columnIndex
     const columns = ['morning', 'main', 'evening', 'whole day'];
     
     columns.forEach(columnName => {
-        // Get habits for this column
         let columnHabits = habits.filter(habit => habit.belongs === columnName);
         
-        // Update their nextDue and streaks
         columnHabits = columnHabits.map(habit => {
             const oldNextDue = habit.nextDue;
             habit.nextDue = recalculateNextDueFromStart(habit, today);
             
             const updatedHabit = autoUpdateStreakIfBroken(habit);
             
-            // Save if changed
             if (oldNextDue !== habit.nextDue || updatedHabit !== habit) {
                 updateHabitInStorage(updatedHabit);
             }
@@ -893,39 +757,33 @@ function loadHabits() {
             return updatedHabit;
         });
         
-        // Apply smart scheduling filter
         const filteredHabits = columnHabits.filter(habit => {
             return showAllHabits || isHabitDueToday(habit) || isHabitCompletedToday(habit);
         });
         
-        // Sort by columnIndex
         const sortedHabits = filteredHabits.sort((a, b) => {
             const indexA = a.columnIndex || 999;
             const indexB = b.columnIndex || 999;
             return indexA - indexB;
         });
         
-        // ✅ FIX: Only clear and show empty if no habits will be displayed
         const columnContainer = getColumnContainer(columnName);
         if (sortedHabits.length === 0) {
-            // Show appropriate empty message
             showEmptyColumnMessage(columnContainer, columnName);
         } else {
-            // Clear the column and display habits
             columnContainer.innerHTML = '';
             sortedHabits.forEach(habit => {
                 displayHabitInColumn(habit);
             });
-            columnsWithHabits.add(columnName);
         }
     });
     
-    // ✅ Initialize drag & drop after loading habits
     setTimeout(() => {
         initializeDragAndDrop();
     }, 100);
 }
-// ===== EDIT MODAL FUNCTIONS =====
+
+// EDIT MODAL FUNCTIONS
 function preSelectCustomDays(customdays) {
     if (!customdays) return;
     
@@ -1008,10 +866,8 @@ function saveEditedHabit(originalHabit) {
         newNotes = document.getElementById('editNote').value || '';
     }
     
-    // ✅ NEW: Handle column change
     let newColumnIndex = originalHabit.columnIndex;
     if (newBelongs !== originalHabit.belongs) {
-        // Habit changed columns - put at bottom of new column
         const allHabits = readHabits();
         const sameColumnHabits = allHabits.filter(h => h.belongs === newBelongs);
         const maxIndex = sameColumnHabits.length > 0 
@@ -1033,7 +889,7 @@ function saveEditedHabit(originalHabit) {
         incrementation: newIncrementation,
         startDate: newStartDate,
         notes: newNotes,
-        columnIndex: newColumnIndex  // ✅ NEW: Include columnIndex
+        columnIndex: newColumnIndex
     };
     
     const today = getTodayDate();
@@ -1044,7 +900,7 @@ function saveEditedHabit(originalHabit) {
     loadHabits();
 }
 
-// ===== CREATE HABIT MODAL FUNCTIONS =====
+// CREATE HABIT MODAL FUNCTIONS
 function openCreateModal() {
     const modal = document.createElement('div');
     modal.id = 'createModal';
@@ -1173,14 +1029,11 @@ function openCreateModal() {
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
 
-    // Set default start date to today
     const today = getTodayDate();
     document.getElementById('modalStartDate').value = today;
 
-    // Setup event listeners
     setupCreateModalEventListeners();
 
-    // Close modal when clicking outside
     modal.onclick = (e) => {
         if (e.target === modal) {
             closeCreateModal();
@@ -1189,16 +1042,13 @@ function openCreateModal() {
 }
 
 function setupCreateModalEventListeners() {
-    // Frequency type change
     document.getElementById('modalFreqInput').addEventListener('change', function() {
         const selectedValue = this.value;
         
-        // Hide all sections
         document.getElementById('modalDailySection').style.display = 'none';
         document.getElementById('modalIntervalSection').style.display = 'none';
         document.getElementById('modalCustomSection').style.display = 'none';
         
-        // Show relevant section
         if (selectedValue === 'daily') {
             document.getElementById('modalDailySection').style.display = 'block';
         } else if (selectedValue === 'interval') {
@@ -1208,22 +1058,17 @@ function setupCreateModalEventListeners() {
         }
     });
 
-    // Counter checkbox
     document.getElementById('modalCounterCheckbox').addEventListener('change', function() {
         const counterSection = document.getElementById('modalCounterSection');
         counterSection.style.display = this.checked ? 'block' : 'none';
     });
 
-    // Note checkbox
     document.getElementById('modalNoteCheckbox').addEventListener('change', function() {
         const noteSection = document.getElementById('modalNoteSection');
         noteSection.style.display = this.checked ? 'block' : 'none';
     });
 
-    // Create button
     document.getElementById('createHabitBtn').onclick = createHabitFromModal;
-    
-    // Cancel button
     document.getElementById('cancelCreateBtn').onclick = closeCreateModal;
 }
 
@@ -1242,7 +1087,6 @@ function createHabitFromModal() {
     const selectedColor = document.getElementById('modalColorInput').value || 'default';
     const selectedBelongs = document.getElementById('modalBelongsInput').value || 'whole day';
     
-    // Validate required fields
     if (!title || !freq) {
         alert('Please fill in all required fields');
         return;
@@ -1272,8 +1116,6 @@ function createHabitFromModal() {
         note = document.getElementById('modalNoteValue').value || '';
     }
 
-    console.log('Creating habit with belongs:', selectedBelongs); // Debug log
-
     try {
         createHabit(
             Date.now(),
@@ -1287,14 +1129,13 @@ function createHabitFromModal() {
             startDate,
             note,
             selectedColor,
-            selectedBelongs  // ✅ Make sure this is passed
+            selectedBelongs
         );
         
         closeCreateModal();
         loadHabits();
         
     } catch (error) {
-        console.error('Error creating habit:', error);
         alert('Error creating habit: ' + error.message);
     }
 }
@@ -1312,7 +1153,6 @@ function getSelectedModalWeekdays() {
     
     return selected.join(',');
 }
-
 
 function openEditModal(habit) {
     const modal = document.createElement('div');
@@ -1346,7 +1186,6 @@ function openEditModal(habit) {
         
         <label for="editTitle">Habit Title:</label>
         <input type="text" id="editTitle" value="${habit.title}" required />
-
         <br><br>
 
         <label for="editProject">Project Name:</label>
@@ -1355,28 +1194,27 @@ function openEditModal(habit) {
 
         <label for="editColor">Color:</label>
         <select id="editColor">
-        <option value="default" ${habit.color === 'default' ? 'selected' : ''}>Default (Gray)</option>
-        <option value="violet" ${habit.color === 'violet' ? 'selected' : ''}>Violet</option>
-        <option value="red" ${habit.color === 'red' ? 'selected' : ''}>Red</option>
-        <option value="green" ${habit.color === 'green' ? 'selected' : ''}>Green</option>
-        <option value="blue" ${habit.color === 'blue' ? 'selected' : ''}>Blue</option>
-        <option value="orange" ${habit.color === 'orange' ? 'selected' : ''}>Orange</option>
-        <option value="pink" ${habit.color === 'pink' ? 'selected' : ''}>Pink</option>
-        <option value="cyan" ${habit.color === 'cyan' ? 'selected' : ''}>Cyan</option>
-        <option value="yellow" ${habit.color === 'yellow' ? 'selected' : ''}>Yellow</option>
-        <option value="purple" ${habit.color === 'purple' ? 'selected' : ''}>Purple</option>
+            <option value="default" ${habit.color === 'default' ? 'selected' : ''}>Default (Gray)</option>
+            <option value="violet" ${habit.color === 'violet' ? 'selected' : ''}>Violet</option>
+            <option value="red" ${habit.color === 'red' ? 'selected' : ''}>Red</option>
+            <option value="green" ${habit.color === 'green' ? 'selected' : ''}>Green</option>
+            <option value="blue" ${habit.color === 'blue' ? 'selected' : ''}>Blue</option>
+            <option value="orange" ${habit.color === 'orange' ? 'selected' : ''}>Orange</option>
+            <option value="pink" ${habit.color === 'pink' ? 'selected' : ''}>Pink</option>
+            <option value="cyan" ${habit.color === 'cyan' ? 'selected' : ''}>Cyan</option>
+            <option value="yellow" ${habit.color === 'yellow' ? 'selected' : ''}>Yellow</option>
+            <option value="purple" ${habit.color === 'purple' ? 'selected' : ''}>Purple</option>
         </select>
         <br><br>
 
-        <!-- ✅ ADD THIS BELONGS SECTION -->
-    <label for="editBelongs">Belongs to:</label>
-    <select id="editBelongs">
-        <option value="whole day" ${habit.belongs === 'whole day' ? 'selected' : ''}>Whole Day</option>
-        <option value="morning" ${habit.belongs === 'morning' ? 'selected' : ''}>Morning</option>
-        <option value="main" ${habit.belongs === 'main' ? 'selected' : ''}>Main</option>
-        <option value="evening" ${habit.belongs === 'evening' ? 'selected' : ''}>Evening</option>
-    </select>
-    <br><br>
+        <label for="editBelongs">Belongs to:</label>
+        <select id="editBelongs">
+            <option value="whole day" ${habit.belongs === 'whole day' ? 'selected' : ''}>Whole Day</option>
+            <option value="morning" ${habit.belongs === 'morning' ? 'selected' : ''}>Morning</option>
+            <option value="main" ${habit.belongs === 'main' ? 'selected' : ''}>Main</option>
+            <option value="evening" ${habit.belongs === 'evening' ? 'selected' : ''}>Evening</option>
+        </select>
+        <br><br>
 
         <label for="editFreq">Frequency Type:</label>
         <select id="editFreq" required>
@@ -1427,14 +1265,14 @@ function openEditModal(habit) {
         </div>
 
         <label for="editNoteCheckbox">Want to edit note?</label>
-<input type="checkbox" id="editNoteCheckbox" ${habit.notes && habit.notes.trim() !== '' ? 'checked' : ''}>
-<br><br>
+        <input type="checkbox" id="editNoteCheckbox" ${habit.notes && habit.notes.trim() !== '' ? 'checked' : ''}>
+        <br><br>
 
-<div id="editNoteInputSection" style="display: ${habit.notes && habit.notes.trim() !== '' ? 'block' : 'none'};">
-    <label for="editNote">Note:</label>
-    <textarea id="editNote" placeholder="Write your note here..." rows="3" cols="40">${habit.notes || ''}</textarea>
-    <br><br>
-</div>
+        <div id="editNoteInputSection" style="display: ${habit.notes && habit.notes.trim() !== '' ? 'block' : 'none'};">
+            <label for="editNote">Note:</label>
+            <textarea id="editNote" placeholder="Write your note here..." rows="3" cols="40">${habit.notes || ''}</textarea>
+            <br><br>
+        </div>
 
         <button type="button" id="saveEditBtn">Save Changes</button>
         <button type="button" id="cancelEditBtn">Cancel</button>
@@ -1457,53 +1295,42 @@ function openEditModal(habit) {
     };
 }
 
-// ===== EVENT LISTENERS =====
-// ===== NEW CODE - USE THIS =====
+// EVENT LISTENERS
 showFormButton.addEventListener('click', function () {
-    openCreateModal(); // ✅ Simply call the modal function
+    openCreateModal();
 });
-// ===== TOGGLE VIEW EVENT LISTENER =====
-// ===== UPDATE TOGGLE VIEW EVENT LISTENER =====
+
 toggleViewButton.addEventListener('click', function() {
     showAllHabits = !showAllHabits;
     
     if (showAllHabits) {
-        // ✅ ORGANIZE MODE
         toggleViewButton.textContent = '🎯 Today Focus';
         toggleViewButton.className = 'btn btn-primary';
         document.body.classList.remove('smart-view');
         document.body.classList.add('organize-view');
-        console.log('Switched to ORGANIZE mode - drag & drop will be enabled');
     } else {
-        // ✅ SMART MODE
         toggleViewButton.textContent = '📝 Organize Habits';
         toggleViewButton.className = 'btn btn-secondary';
         document.body.classList.remove('organize-view');
         document.body.classList.add('smart-view');
-        
-        // ✅ FIX: Destroy drag & drop when switching to smart mode
         destroyDragAndDrop();
-        console.log('Switched to SMART mode - drag & drop disabled');
     }
     
-    loadHabits(); // This will call initializeDragAndDrop() only if showAllHabits = true
+    loadHabits();
 });
 
-// ===== KEYBOARD SHORTCUTS =====
+// KEYBOARD SHORTCUTS
 document.addEventListener('keydown', function(event) {
-    // Ctrl/Cmd + N = Create new habit
     if ((event.ctrlKey || event.metaKey) && event.key === 'n') {
         event.preventDefault();
         document.getElementById('createHabitButton').click();
     }
     
-    // Ctrl/Cmd + O = Toggle organization mode
     if ((event.ctrlKey || event.metaKey) && event.key === 'o') {
         event.preventDefault();
         document.getElementById('toggleViewButton').click();
     }
     
-    // Escape = Close any open modal
     if (event.key === 'Escape') {
         closeCreateModal();
         closeEditModal();
@@ -1511,7 +1338,7 @@ document.addEventListener('keydown', function(event) {
     }
 });
 
-// ===== ENHANCED BUTTON FEEDBACK =====
+// BUTTON FEEDBACK
 function addButtonFeedback() {
     const buttons = document.querySelectorAll('.btn');
     buttons.forEach(button => {
@@ -1524,39 +1351,11 @@ function addButtonFeedback() {
     });
 }
 
-// ===== INITIALIZE APP STATE =====
-document.addEventListener('DOMContentLoaded', function() {
-    // Set initial mode
-    if (showAllHabits) {
-        document.body.classList.add('organize-view');
-        toggleViewButton.textContent = '🎯 Today Focus';
-        toggleViewButton.className = 'btn btn-primary';
-    } else {
-        document.body.classList.add('smart-view');
-        toggleViewButton.textContent = '📝 Organize Habits';
-        toggleViewButton.className = 'btn btn-secondary';
-    }
-    
-    // Load habits
-    loadHabits();
-    
-    // Add button feedback
-    addButtonFeedback();
-    
-    console.log('🚀 Habit Tracker initialized successfully!');
-});
-
-// Call after DOM loads
-document.addEventListener('DOMContentLoaded', addButtonFeedback);
-
-
-// ===== SUCCESS FEEDBACK SYSTEM =====
+// SUCCESS FEEDBACK SYSTEM
 function showSuccessMessage(message, duration = 3000) {
-    // Remove existing success message
     const existing = document.getElementById('successMessage');
     if (existing) existing.remove();
     
-    // Create success message
     const successDiv = document.createElement('div');
     successDiv.id = 'successMessage';
     successDiv.style.cssText = `
@@ -1576,7 +1375,6 @@ function showSuccessMessage(message, duration = 3000) {
     
     document.body.appendChild(successDiv);
     
-    // Remove after duration
     setTimeout(() => {
         if (successDiv.parentNode) {
             successDiv.style.animation = 'slideOutRight 0.3s ease';
@@ -1600,18 +1398,19 @@ style.textContent = `
 `;
 document.head.appendChild(style);
 
-// Update your success points to show feedback
-// In createHabitFromModal():
-// showSuccessMessage('✅ Habit created successfully!');
-
-// In handleHabitReorder():
-// showSuccessMessage('✅ Habits reordered!');
-
-// In markHabitComplete():
-// showSuccessMessage('✅ Habit completed!');
-
-
-
-
-// ===== INITIALIZATION =====
-document.addEventListener('DOMContentLoaded', loadHabits);
+// INITIALIZE APP STATE
+document.addEventListener('DOMContentLoaded', function() {
+    if (showAllHabits) {
+        document.body.classList.add('organize-view');
+        toggleViewButton.textContent = '🎯 Today Focus';
+        toggleViewButton.className = 'btn btn-primary';
+    } else {
+        document.body.classList.add('smart-view');
+        toggleViewButton.textContent = '📝 Organize Habits';
+        toggleViewButton.className = 'btn btn-secondary';
+    }
+    
+    fixInvalidBelongs();
+    loadHabits();
+    addButtonFeedback();
+});

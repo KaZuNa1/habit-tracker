@@ -1,19 +1,21 @@
+/**
+ * Calculates the initial next due date for a new habit
+ * @param {string} frequencyType - Type of frequency ('daily', 'interval', 'custom_weekdays')
+ * @param {number} intervalday - Days between repetitions for interval type
+ * @param {string} customdays - Comma-separated weekdays for custom frequency
+ * @param {string} completedDate - Start date for the habit
+ * @returns {string} Next due date in YYYY-MM-DD format
+ */
 function calculateNextDue(frequencyType, intervalday, customdays, completedDate) {
     const today = new Date(completedDate);
     let nextDue;
     
     if (frequencyType === 'daily') {
-        // ✅ FIX: For daily habits, they should be due TODAY when first created
-        // Only move to tomorrow AFTER completion
+        // Daily habits start due today
         nextDue = new Date(today);
-        // Don't add a day - start from today
-        
     } else if (frequencyType === 'interval') {
-        // ✅ FIX: For interval habits, they should be due TODAY when first created
-        // Only move forward by interval AFTER completion
+        // Interval habits start due today
         nextDue = new Date(today);
-        // Don't add interval days - start from today
-        
     } else if (frequencyType === 'custom_weekdays') {
         nextDue = getNextValidWeekday(today, customdays);
     }
@@ -21,26 +23,37 @@ function calculateNextDue(frequencyType, intervalday, customdays, completedDate)
     return nextDue.toISOString().split('T')[0];
 }
 
+/**
+ * Calculates next due date after habit completion
+ * @param {string} frequencyType - Type of frequency
+ * @param {number} intervalday - Days between repetitions
+ * @param {string} customdays - Comma-separated weekdays
+ * @param {string} completedDate - Date when habit was completed
+ * @returns {string} Next due date in YYYY-MM-DD format
+ */
 function calculateNextDueAfterCompletion(frequencyType, intervalday, customdays, completedDate) {
-    // ✅ NEW FUNCTION: Use this AFTER a habit is completed to calculate the NEXT due date
     const today = new Date(completedDate);
     let nextDue;
     
     if (frequencyType === 'daily') {
         nextDue = new Date(today);
-        nextDue.setDate(today.getDate() + 1); // Tomorrow
-        
+        nextDue.setDate(today.getDate() + 1);
     } else if (frequencyType === 'interval') {
         nextDue = new Date(today);
-        nextDue.setDate(today.getDate() + parseInt(intervalday)); // Add interval
-        
+        nextDue.setDate(today.getDate() + parseInt(intervalday));
     } else if (frequencyType === 'custom_weekdays') {
-        nextDue = getNextValidWeekdayAfterCompletion(today, customdays); // ✅ Use the new function
+        nextDue = getNextValidWeekdayAfterCompletion(today, customdays);
     }
     
     return nextDue.toISOString().split('T')[0];
 }
 
+/**
+ * Finds the next valid weekday for custom frequency habits (initial creation)
+ * @param {Date} fromDate - Starting date
+ * @param {string} customdays - Comma-separated weekdays
+ * @returns {Date} Next valid date
+ */
 function getNextValidWeekday(fromDate, customdays) {
     const weekdayMap = {
         'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
@@ -50,16 +63,15 @@ function getNextValidWeekday(fromDate, customdays) {
     const validDays = customdays.split(',').map(day => weekdayMap[day.trim().toLowerCase()]);
     const currentDate = new Date(fromDate);
     
-    // Check if TODAY is a valid day first (only for initial creation, not after completion)
+    // Check if today is a valid day first
     const todayDayNumber = currentDate.getDay();
     if (validDays.includes(todayDayNumber)) {
         return currentDate;
     }
     
-    // Start checking from tomorrow
+    // Find next valid weekday starting tomorrow
     currentDate.setDate(currentDate.getDate() + 1);
     
-    // Find next valid weekday
     for (let i = 0; i < 7; i++) {
         const dayOfWeek = currentDate.getDay();
         if (validDays.includes(dayOfWeek)) {
@@ -71,8 +83,13 @@ function getNextValidWeekday(fromDate, customdays) {
     return currentDate;
 }
 
+/**
+ * Finds the next valid weekday after habit completion (skips today)
+ * @param {Date} fromDate - Completion date
+ * @param {string} customdays - Comma-separated weekdays
+ * @returns {Date} Next valid date
+ */
 function getNextValidWeekdayAfterCompletion(fromDate, customdays) {
-    // ✅ NEW FUNCTION: Always skip today and find the NEXT occurrence
     const weekdayMap = {
         'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
         'thursday': 4, 'friday': 5, 'saturday': 6
@@ -81,10 +98,9 @@ function getNextValidWeekdayAfterCompletion(fromDate, customdays) {
     const validDays = customdays.split(',').map(day => weekdayMap[day.trim().toLowerCase()]);
     const currentDate = new Date(fromDate);
     
-    // Always start checking from tomorrow (skip today)
+    // Always start checking from tomorrow
     currentDate.setDate(currentDate.getDate() + 1);
     
-    // Find next valid weekday
     for (let i = 0; i < 7; i++) {
         const dayOfWeek = currentDate.getDay();
         if (validDays.includes(dayOfWeek)) {
@@ -96,8 +112,14 @@ function getNextValidWeekdayAfterCompletion(fromDate, customdays) {
     return currentDate;
 }
 
+/**
+ * Checks if streak is broken for custom weekday habits
+ * @param {string} lastCompletionDate - Last completion date
+ * @param {string} todayDate - Current date
+ * @param {string} customdays - Comma-separated weekdays
+ * @returns {boolean} True if streak is broken
+ */
 function checkIfCustomWeekdaysStreakBroken(lastCompletionDate, todayDate, customdays) {
-    // ✅ NEW FUNCTION: Check if any valid days were missed for custom weekdays
     const weekdayMap = {
         'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3,
         'thursday': 4, 'friday': 5, 'saturday': 6
@@ -107,26 +129,29 @@ function checkIfCustomWeekdaysStreakBroken(lastCompletionDate, todayDate, custom
     const lastDate = new Date(lastCompletionDate);
     const currentDate = new Date(todayDate);
     
-    // Start checking from the day after last completion
+    // Check each day between last completion and today
     const checkDate = new Date(lastDate);
     checkDate.setDate(checkDate.getDate() + 1);
     
-    // Check each day between last completion and today
     while (checkDate < currentDate) {
         const dayOfWeek = checkDate.getDay();
         
-        // If we find a valid day that was missed, streak is broken
         if (validDays.includes(dayOfWeek)) {
-            console.log(`Streak broken! Missed valid day: ${checkDate.toISOString().split('T')[0]} (${Object.keys(weekdayMap)[dayOfWeek]})`);
-            return true;
+            return true; // Valid day was missed
         }
         
         checkDate.setDate(checkDate.getDate() + 1);
     }
     
-    return false; // No valid days were missed
+    return false;
 }
 
+/**
+ * Recalculates next due date from habit start date
+ * @param {Object} habit - Habit object
+ * @param {string} currentDate - Current date
+ * @returns {string} Next due date
+ */
 function recalculateNextDueFromStart(habit, currentDate) {
     if (currentDate < habit.startDate) {
         return habit.startDate;
@@ -145,7 +170,6 @@ function recalculateNextDueFromStart(habit, currentDate) {
         }
         
     } else if (habit.frequencyType === 'interval') {
-        // ✅ NEW: Pattern-based calculation for intervals
         return calculateIntervalPatternNextDue(habit, currentDate);
         
     } else if (habit.frequencyType === 'custom_weekdays') {
@@ -155,39 +179,41 @@ function recalculateNextDueFromStart(habit, currentDate) {
     return currentDate;
 }
 
-// ✅ NEW FUNCTION: Calculate next due based on creation pattern
+/**
+ * Calculates next due date for interval habits based on pattern from start date
+ * @param {Object} habit - Habit object with startDate and intervalday
+ * @param {string} currentDate - Current date
+ * @returns {string} Next due date in YYYY-MM-DD format
+ */
 function calculateIntervalPatternNextDue(habit, currentDate) {
     const startDate = new Date(habit.startDate);
     const current = new Date(currentDate);
     const intervalDays = parseInt(habit.intervalday);
     
-    // Calculate days since creation
     const daysSinceStart = Math.floor((current - startDate) / (1000 * 60 * 60 * 24));
     
-    // ✅ FIX: Check if today is already a pattern day
+    // Check if today is a pattern day
     if (daysSinceStart >= 0 && daysSinceStart % intervalDays === 0) {
-        // Today IS a pattern day - check if completed
         const isCompletedToday = habit.completionHistory && 
             habit.completionHistory[habit.completionHistory.length - 1] === currentDate;
         
         if (isCompletedToday) {
-            // Already completed today, next due is in intervalDays
+            // Already completed, next due is in intervalDays
             const nextDueDate = new Date(current);
             nextDueDate.setDate(current.getDate() + intervalDays);
             return nextDueDate.toISOString().split('T')[0];
         } else {
-            // Not completed yet, due TODAY
+            // Due today
             return currentDate;
         }
     }
     
-    // ✅ FIX: Find the next pattern day from start date
-    let nextPatternDay = intervalDays; // Start with first interval
+    // Find next pattern day
+    let nextPatternDay = intervalDays;
     while (nextPatternDay <= daysSinceStart) {
         nextPatternDay += intervalDays;
     }
     
-    // Calculate the actual date
     const nextDueDate = new Date(startDate);
     nextDueDate.setDate(startDate.getDate() + nextPatternDay);
     
@@ -201,5 +227,5 @@ module.exports = {
     getNextValidWeekdayAfterCompletion,
     checkIfCustomWeekdaysStreakBroken,
     recalculateNextDueFromStart,
-    calculateIntervalPatternNextDue  // ✅ ADD THIS
+    calculateIntervalPatternNextDue
 };

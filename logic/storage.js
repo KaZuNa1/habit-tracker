@@ -5,7 +5,10 @@ const Habit = require('./Habit');
 const dataDir = path.join(__dirname, '..', 'data');
 const dataFilePath = path.join(dataDir, 'habits.json');
 
-// 📥 Read habits from the file (returns array)
+/**
+ * Reads all habits from storage and converts them to Habit instances
+ * @returns {Array<Habit>} Array of Habit objects
+ */
 function readHabits() {
   if (!fs.existsSync(dataFilePath)) {
     return [];
@@ -20,7 +23,7 @@ function readHabits() {
     
     const plainData = JSON.parse(rawData);
     
-    // Convert plain objects back to Habit instances with ALL parameters including startDate
+    // Convert plain objects back to Habit instances with backward compatibility
     return plainData.map(habitData => new Habit(
         habitData.id,
         habitData.title, 
@@ -40,10 +43,9 @@ function readHabits() {
         habitData.createdDate || new Date().toISOString().split('T')[0],
         habitData.notes || "",
         habitData.belongs || habitData.priority || "whole day",
-        habitData.startDate || habitData.createdDate || new Date().toISOString().split('T')[0] , // ✅ NEW: Default to createdDate for backward compatibility
+        habitData.startDate || habitData.createdDate || new Date().toISOString().split('T')[0],
         habitData.color || "default",
         habitData.columnIndex || 999
-        
     ));
     
   } catch (error) {
@@ -52,9 +54,12 @@ function readHabits() {
   }
 }
 
-// 💾 Save updated habit list to file
+/**
+ * Writes habit array to storage file
+ * @param {Array<Habit>} habits - Array of habits to save
+ */
 function writeHabits(habits) {
-  // Create data directory if it doesn't exist
+  // Ensure data directory exists
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }
@@ -67,14 +72,21 @@ function writeHabits(habits) {
   }
 }
 
-// 📌 Main function to save one habit
+/**
+ * Adds a new habit to storage
+ * @param {Habit} habitObject - The habit instance to save
+ */
 function saveHabit(habitObject) {
   const habits = readHabits();
   habits.push(habitObject);
   writeHabits(habits);
 }
 
-function removeHabit(habitToDelete){
+/**
+ * Removes a habit from storage by ID
+ * @param {Habit} habitToDelete - The habit to remove
+ */
+function removeHabit(habitToDelete) {
   const allHabits = readHabits();
   const remainingHabits = allHabits.filter(habit => 
     habit.id !== habitToDelete.id
